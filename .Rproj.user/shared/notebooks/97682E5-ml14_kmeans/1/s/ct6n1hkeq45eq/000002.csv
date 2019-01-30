@@ -1,0 +1,9 @@
+"0","```r
+wcss = c(8000, 3000, 1000, 900, 800, 700, 600, 500, 400, 300, 200, 100)
+cluster_num = seq(1, length(wcss), by = 1)
+plot(wcss, type = \"b\", xlab = \"Number of Clusters\", ylab = \"WCSS\", main = \"The Elbow Method\")
+axis(side = 1, at = cluster_num)
+```"
+"0","```r
+points(wcss, pch = 21, bg = ifelse(cluster_num == 3, 'white', 'red3'))
+```"

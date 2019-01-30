@@ -1,0 +1,15 @@
+"0","```r
+
+(colData(se) <- DataFrame(mtdata))
+head(assay(se))
+ddsSE <- DESeqDataSet(se, design = ~ condition)
+dds <- DESeq(ddsSE)
+keep <- rowSums(counts(dds)) >= 10
+dds <- dds[keep,]
+
+rld <- rlog(dds)
+#vsd <- varianceStabilizingTransformation(dds)
+nt <- normTransform(dds)
+#res <- results(dds, lfcThreshold = 2, altHypothesis = \"greaterAbs\")
+res <- results(dds, tidy = T)
+```"

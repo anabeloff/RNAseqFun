@@ -1,0 +1,7 @@
+"0","```r
+colnames(dds)
+
+```"
+"1"," [1] \"1_0_p74-3cont\"   \"1_1_p74-3cont\"   \"1_2_p74-3cont\"   \"2_0_EP155cont\"   \"2_1_EP155cont\"   \"2_2_EP155cont\"   \"3_0_p29cont\"     \"4_0_p29stopcont\"
+ [9] \"5_0_dcl2cont\"    \"6_0_EP155mix\"    \"6_1_EP155mix\"    \"6_2_EP155mix\"    \"7_0_p29mix\"      \"8_0_p29stopmix\"  \"9_0_dcl2mix\"    
+"

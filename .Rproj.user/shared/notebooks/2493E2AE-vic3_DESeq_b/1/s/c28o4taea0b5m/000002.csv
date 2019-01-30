@@ -1,0 +1,7 @@
+"0","```r
+proteins <- sigGenesPlot(ptrn[[1]],
+                         value = ptrn[[2]],
+                         heatmap = T,
+                         dataTable = list(nt, ntN),
+                         annotationTbl = list(mainTbl, mainTbl_novel))
+```"

@@ -1,0 +1,25 @@
+"0","seDay2 <- se[,c(7:15)]"
+"0","mtdata <- data.frame("
+"0","  strains = factor(c(rep(""RussetBurbank"", 3), rep(""PinkPearl"", 3), rep(""NoTuberMedia"", 3))),"
+"0","  condition = factor(c(rep(""Tuber"", 6), rep(""Control"", 3)), levels = c(""Control"", ""Tuber"")),"
+"0","  resistance = factor(c(rep(""Susceptible"", 3), rep(""Resistant"", 3), rep(""Control"", 3))),"
+"0","  clustering = factor(c(rep(""experiment"", 6), rep(""control"", 3)))"
+"0",")"
+"0","row.names(mtdata) <- colnames(seDay2)"
+"0","ddsDay2 <- DDSdataDESeq2(objectSE = seDay2, metaDataTable = mtdata, designFormula = ~ condition)"
+"2","estimating size factors
+"
+"2","estimating dispersions
+"
+"2","gene-wise dispersion estimates
+"
+"2","mean-dispersion relationship
+"
+"2","final dispersion estimates
+"
+"2","fitting model and testing
+"
+"0","ddsDay2$condition <- stats::relevel(ddsDay2$condition, ref = ""Control"")"
+"0","ddsDay2sus <- ddsDay2[,ddsDay2$strains != ""PinkPearl""]"
+"0","ddsDay2res <- ddsDay2[,ddsDay2$strains != ""RussetBurbank""]"
+"0","mtdata"

@@ -1,0 +1,16 @@
+"0","```r
+cutTr = 19
+  nm <- paste(rep(\"Cluster\", cutTr), c(1:cutTr), sep = \"\")
+  #Only Novel transcripts
+  ntNN <- ntN[mainTbl_novel$gene_id,]
+  
+  
+  png(filename = \"heatMapClusters.png\", height = 800, width = 600, units = \"px\")
+  pdf(file = \"heatMapClusters_absExpr1.pdf\", height = 9, width = 9, onefile = TRUE)
+  
+  groups <- clusterGenes2(clusterColumns = c(6:9), summarise_clusters = F, value = 1, cutTree = 9, distRows = \"euclidean\", clusterMethod = \"average\", clusterNames = NA, logChange = \"absolute\")
+  groups <- clusterGenes2(clusterColumns = c(6:9), summarise_clusters = T, value = 2, cutTree = 19, distRows = \"euclidean\", clusterMethod = \"average\", clusterNames = NA, logChange = \"absolute\")
+  dev.off()
+  
+  write.table(groups, file = \"grouped_clusters_all.tab\", sep = \"\t\", quote = F, row.names = F, col.names = T)
+```"

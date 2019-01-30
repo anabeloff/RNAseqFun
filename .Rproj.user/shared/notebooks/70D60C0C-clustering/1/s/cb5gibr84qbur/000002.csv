@@ -1,0 +1,22 @@
+"0","```r
+clara(htmdt[,3:5], 3)
+
+```"
+"1","Call:	 clara(x = htmdt[, 3:5], k = 3) 
+Medoids:
+          X3_p29cont X4_p29stopcont X5_dcl2cont
+gene3172  0.07089272    -0.02071676   0.1364489
+gene4968  0.13213963     0.16371688  -1.2262191
+gene10709 0.00000000     0.00000000   0.8972996
+Objective function:	 0.6174396
+Clustering vector: 	 Named int [1:11610] 1 2 2 1 1 1 1 1 2 3 3 3 1 1 3 1 1 1 ...
+ - attr(*, \"names\")= chr [1:11610] \"gene1\" \"gene10\" \"gene100\" \"gene1000\" \"gene10000\" \"gene10001\" \"gene10002\" ...
+Cluster sizes:	    	 6347 2714 2549 
+Best sample:
+ [1] gene10114 gene10156 gene10418 gene10709 gene11050 gene11391 gene11546 gene1313  gene1374  gene1412  gene1569  gene1729  gene1839  gene185   gene288   gene3084 
+[17] gene3172  gene3222  gene3322  gene3329  gene3734  gene411   gene4739  gene4740  gene4968  gene5061  gene528   gene5734  gene5897  gene617   gene6210  gene6581 
+[33] gene7078  gene7102  gene7246  gene7277  gene736   gene7460  gene7827  gene8119  gene836   gene8405  gene8647  gene8894  gene9250  gene9766 
+
+Available components:
+ [1] \"sample\"     \"medoids\"    \"i.med\"      \"clustering\" \"objective\"  \"clusinfo\"   \"diss\"       \"call\"       \"silinfo\"    \"data\"      
+"

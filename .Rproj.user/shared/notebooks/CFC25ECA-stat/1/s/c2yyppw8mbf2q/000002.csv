@@ -1,0 +1,6 @@
+"0","```r
+genFunc(obj)
+
+```"
+"1","[1] \"Show this when object of class ObjClass called.\"
+"

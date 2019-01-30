@@ -1,0 +1,174 @@
+"0","```r
+clusterGenes2 <- function(value = 0, 
+                            clusterColumns = c(1:length(colnames(htmdt))), 
+                            summarise_clusters = FALSE, 
+                            cutTree = NA, 
+                            distRows = \"euclidean\", 
+                            clusterMethod = \"average\", 
+                            clusterNames = NA, 
+                            logChange = \"absolute\", 
+                            resTable = TRUE, 
+                            annotationTbl = list(mainTbl, mainTbl_novel),
+                            dataTable = list(nt, ntNN),
+                            annot = NA) {
+  if(is.na(annot)) {
+    warning(\"Annotation not provided.\")
+    stop(\"Use colData from DESeq analysis!\")
+  }
+    # Default Cluster Names
+    if(is.na(clusterNames)) {
+      clusterNames <- paste(rep(\"Cluster\", cutTree), c(1:cutTree), sep = \"\")
+    }
+    
+    message(\"Selecting genes...\", appendLF = F)
+  
+    #annot <- data.frame(colData(dds)[-1, c(\"strains\", \"condition\")])
+    #HEATMAP
+    # Select data Table
+    for (u in 1:length(dataTable)) {
+      tb <- assay(dataTable[[u]])
+      
+      if(u == 1) {
+        htmdt <- tb
+      } else {
+        htmdt <- rbind(htmdt, tb)
+      }
+    }
+    
+    #Normazing controls to p74-3
+    #We take mean for all EP155 variants controls with single p74-3
+    for(i in c(2:5)) {
+      htmdt <- cbind(htmdt, rowMeans(htmdt[,c(1,i)]))
+    }
+       
+  #Showing Differential expression in Log2fold change scale for individeal columns.
+    htmdt[,c(6:9)] <- htmdt[,c(6:9)] - htmdt[,c(10:13)]
+          
+          # effects on controls
+          # must be calculated before normalising.
+          htmdt[,3] <- htmdt[,3] - htmdt[,2]
+          htmdt[,4] <- htmdt[,4] - htmdt[,2]
+          htmdt[,5] <- htmdt[,5] - htmdt[,2]
+    
+    # Sample list
+    sampleN <- colnames(htmdt)
+    data_list <- data.frame()
+    for(i in clusterColumns) {
+      
+      gsig_counts <- data.frame(htmdt[abs(htmdt[,i]) >= value,i])
+      
+      gsig_join <- gsig_counts %>% mutate(gene_id = rownames(gsig_counts))
+      colnames(gsig_join)[1] <- sampleN[i]
+      
+      if(i == clusterColumns[1]) {
+        data_list <- gsig_join
+      } else {
+        data_list <- full_join(data_list, gsig_join, by = \"gene_id\") 
+      }
+    }
+    row.names(data_list) <- data_list$gene_id
+    
+    sel <- data_list$gene_id
+    htmdt <- htmdt[sel,]
+    
+    #### htmdt selection loop is done
+    message(\"done\", appendLF = T)
+    
+    ## Clustering
+    dst <- dist(htmdt[,clusterColumns], method = distRows)
+    clusters <- hclust(dst, method = clusterMethod)
+    clusterCut <- cutree(clusters, cutTree)
+    
+      message(\"Creating pheatmap...\", appendLF = F)
+      
+      
+      ## Heatmap function
+      mainTitle <- paste(\"Clustering. \", \"Groups: \", cutTree, \".\", sep = \"\")
+      
+      # Annotation for row Clusters
+      annot_row <- data.frame(Clusters = factor(clusterCut))
+      for(u in c(1:cutTree)) {
+        annot_row$Clusters <- sub(paste(\"^\", u, \"$\", sep = \"\"), clusterNames[u], annot_row$Clusters)
+      }
+      
+      # Manual colors for heatmap annotation
+      
+      str = brewer.pal(n = length(unique(annot$strains)), name =\"Greys\")
+      names(str) <- unique(annot$strains)
+      clCut = colorRampPalette(brewer.pal(n = 12, name =\"Paired\"))(cutTree)
+      names(clCut) <- clusterNames
+      cond = c(\"grey\", \"black\")
+      names(cond) <- unique(annot$condition)
+      
+      annot_clr <- list(condition = cond, strains = str, Clusters = clCut)
+      
+      # Clusters Summary 
+      if(summarise_clusters == T) {
+        main_mt <- data.frame(htmdt[,clusterColumns])
+        main_mt$groups <- clusterCut[match(row.names(data_list), names(clusterCut))]
+        for(o in c(1:cutTree)) {
+          main_mt$groups <- gsub(paste(\"^\", o, \"$\", sep = \"\"), clusterNames[o], main_mt$groups)
+        }      
+        
+        main_mt <- main_mt %>%
+          dplyr::group_by(groups) %>%
+          dplyr::summarise_each(funs(mean))
+        
+        row.names(main_mt) <- main_mt$groups
+        
+        annot_row <- data.frame(Clusters = factor(main_mt$groups))
+        row.names(annot_row) <- annot_row$Clusters
+        main_mt <- as.matrix(main_mt[,-1])
+        dimnames(main_mt) <- list(annot_row$Clusters, row.names(annot))
+        
+        main_mt <- main_mt[order(rowMeans(main_mt), decreasing = T),]
+        Mean = rowMeans(main_mt)
+        Variance = round(apply(main_mt, 1, var), digits = 3)
+        main_mt <- cbind(main_mt,Mean)
+        main_mt <- cbind(main_mt,Variance)
+        #dst <- dist(main_mt, method = distRows)
+        #clusters <- hclust(dst, method = clusterMethod)
+        clusters <- F
+        display_numbers <- TRUE
+        
+      } else {
+        main_mt <- htmdt[,clusterColumns]
+        display_numbers <- FALSE
+      }
+      
+      # Heat map colors
+      minV <- round(min(main_mt))-1
+      maxV <- round(max(main_mt))+1
+      clr = c(colorRampPalette(rev(brewer.pal(n = 3, name =\"PuBu\")))(abs(minV)),colorRampPalette(brewer.pal(n = 9, name =\"OrRd\"))(maxV))
+      
+      pheatmap(main_mt, show_rownames = F, show_colnames = F, cluster_cols= FALSE, annotation_col = annot, main = mainTitle, border_color = NA,
+               color = clr,
+               breaks = c(minV:-1, 0, 1:maxV), 
+               #color = colorRampPalette(rev(brewer.pal(n = 11, name =\"RdYlBu\")))(30),
+               annotation_row = annot_row, 
+               annotation_colors = annot_clr,
+               display_numbers = display_numbers, fontsize_number = 10, number_color = \"dodgerblue4\",
+               cluster_rows = clusters, cutree_rows = cutTree, treeheight_row = 80,
+               cellwidth = 40) #, cellheight = 2, clustering_distance_rows = distRows, clustering_method = clusterMethod)
+      message(\"done\", appendLF = T)
+      
+    
+    htmdt <- data.frame(htmdt[,clusterColumns])
+    htmdt[\"Mean\"] <- rowMeans(htmdt)
+    htmdt$gene_id <- row.names(htmdt)
+    ressig <- left_join(data_list[\"gene_id\"], htmdt, by = \"gene_id\")
+    
+    # Annotation table join
+    for(o in 1:length(annotationTbl)) {
+      ressig <- left_join(ressig, annotationTbl[[o]], by = \"gene_id\")
+    }
+    
+    ressig$groups <- clusterCut[match(row.names(data_list), names(clusterCut))]
+    for(o in c(1:cutTree)) {
+      ressig$groups <- gsub(paste(\"^\", o, \"$\", sep = \"\"), clusterNames[o], ressig$groups)
+    }
+    ressig <- ressig[c(\"gene_id\", \"groups\", names(ressig)[c(-1,-28)])]
+    
+    ressig
+  }
+```"

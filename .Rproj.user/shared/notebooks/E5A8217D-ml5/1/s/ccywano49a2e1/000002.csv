@@ -1,0 +1,12 @@
+"0","```r
+# Visualising the SVR results
+library(ggplot2)
+ggplot() +
+  geom_point(aes(x = dataset$Level, y = dataset$Salary),
+             colour = 'red') +
+  geom_line(aes(x = dataset$Level, y = predict(regressor, newdata = dataset)),
+            colour = 'blue') +
+  ggtitle('Truth or Bluff (SVR)') +
+  xlab('Level') +
+  ylab('Salary')
+```"

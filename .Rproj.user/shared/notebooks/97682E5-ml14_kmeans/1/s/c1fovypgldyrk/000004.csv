@@ -1,0 +1,5 @@
+"0","```r
+# Fitting Hierarchical Clustering to the dataset
+hc = hclust(d = dist(dataset, method = 'euclidean'), method = 'ward.D')
+y_hc = cutree(hc, 5)
+```"

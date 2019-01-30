@@ -1,0 +1,24 @@
+"0","groupsDay2cont10sh <- clusterGenes(dds = ddsDay2cont10,
+                        annotationTbl = annotation_Tbl,
+                        clusterColumns = NA,
+                        summarise_clusters = F,
+                        value = 1,
+                        cutTree = 2,
+                        distRows = ""euclidean"",
+                        clusterMethod = ""average"",
+                        clusterNames = NULL,
+                        shrinkLFC = T,
+                        test = F)
+"
+"2","Selecting genes...
+"
+"2","Minimum value is -2.49698008653511
+"
+"2","Maximum value is 2.55276640236281
+"
+"2","using 'apeglm' for LFC shrinkage
+"
+"2","done
+"
+"2","Creating pheatmap...
+"

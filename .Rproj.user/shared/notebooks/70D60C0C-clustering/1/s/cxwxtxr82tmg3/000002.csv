@@ -1,0 +1,15 @@
+"0","```r
+groups_p29 <- clusterGenes2(clusterColumns = c(3:9),
+                        summarise_clusters = F,
+                        value = 0.1,
+                        cutTree = 19,
+                        distRows = \"euclidean\",
+                        clusterMethod = \"average\",
+                        clusterNames = nm,
+                        logChange = \"absolute\",
+                        annot = annot_dds[c(1:8),])
+
+```"
+"1","the condition has length > 1 and only the first element will be usedthe condition has length > 1 and only the first element will be usedSelecting genes...done
+Creating pheatmap...
+"

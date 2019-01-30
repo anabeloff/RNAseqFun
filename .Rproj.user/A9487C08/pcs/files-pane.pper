@@ -1,0 +1,13 @@
+{
+    "path" : "~/rstuff/RNAseqFungi_data",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        },
+        {
+            "ascending" : false,
+            "columnIndex" : 4
+        }
+    ]
+}

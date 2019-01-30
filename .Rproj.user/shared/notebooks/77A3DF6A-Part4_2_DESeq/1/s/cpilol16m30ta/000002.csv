@@ -1,0 +1,5 @@
+"0","annotation_Tbl <- left_join(annotation_Tbl, GFF[c(""gene_id"", ""Name"")], by = ""gene_id"")
+"
+"2","Error in left_join(annotation_Tbl, GFF[c(""gene_id"", ""Name"")], by = ""gene_id"") : 
+  could not find function ""left_join""
+"

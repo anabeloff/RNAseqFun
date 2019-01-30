@@ -1,0 +1,9 @@
+"0","```r
+pdf(file = \"../vic3_project/PCAClusters.pdf\", height = 12, width = 10)
+pcaPl
+dev.off()
+
+```"
+"1","null device 
+          1 
+"

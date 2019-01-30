@@ -1,0 +1,6 @@
+"0","```r
+
+png(filename = \"../vic3_project/PCAClusters.png\", height = 700, width = 900)
+proteins
+dev.off()
+```"

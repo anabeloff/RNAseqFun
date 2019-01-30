@@ -1,0 +1,24 @@
+"0","```r
+se <- readRDS(\"inst/extdata/no2_SEgene_day2.RData\")
+mtdata <- data.frame(
+  strains = factor(c(rep(\"RussetBurbank\", 3), rep(\"PinkPearl\", 3), rep(\"NoTuberMedia\", 3))),
+  condition = factor(c(rep(\"Tuber\", 6), rep(\"Control\", 3))),
+  resistance = factor(c(rep(\"Resistant\", 3), rep(\"Susceptible\", 3), rep(\"Control\", 3)))
+)
+row.names(mtdata) <- colnames(se)
+ddsDay2 <- DDSdataDESeq2(objectSE = se, metaDataTable = mtdata, designFormula = ~ condition)
+```"
+"1","estimating size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+"
+"0","```r
+rldDay2 <- rlog(ddsDay2)
+#vsd <- varianceStabilizingTransformation(dds)
+ntDay2 <- normTransform(ddsDay2)
+#res <- results(dds, lfcThreshold = 2, altHypothesis = \"greaterAbs\")
+resDay2 <- results(ddsDay2, tidy = T)
+```"

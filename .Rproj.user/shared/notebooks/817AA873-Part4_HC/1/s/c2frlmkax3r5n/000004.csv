@@ -1,0 +1,26 @@
+"0","se <- readRDS(system.file(""extdata"", ""no2_SEgene.RData"", package = ""RNAseqFungi""))"
+"0","seDay2cont10 <- se[,c(1:3,7:13,15)]"
+"0","mtdata <- data.frame("
+"0","  strains = factor(c(rep(""RussetBurbank"", 6), rep(""PinkPearl"", 3), rep(""NoTuberMedia"", 2))),"
+"0","  condition = factor(c( rep(""Control"", 3), rep(""Tuber"", 6), rep(""Control"", 2)), levels = c(""Control"", ""Tuber"")),"
+"0","  resistance = factor(c(rep(""Susceptible"", 6), rep(""Resistant"", 3), rep(""Control"", 2))),"
+"0","  clustering = factor(c(rep(""control"", 3), rep(""experiment"", 6), rep(""control"", 2)))"
+"0",")"
+"0","row.names(mtdata) <- colnames(seDay2cont10)"
+"0","ddsDay2cont10 <- DDSdataDESeq2(objectSE = seDay2cont10, metaDataTable = mtdata, designFormula = ~ condition)"
+"2","estimating size factors
+"
+"2","estimating dispersions
+"
+"2","gene-wise dispersion estimates
+"
+"2","mean-dispersion relationship
+"
+"2","final dispersion estimates
+"
+"2","fitting model and testing
+"
+"0","ddsDay2cont10$condition <- stats::relevel(ddsDay2cont10$condition, ref = ""Control"")"
+"0","rldDay2 <- rlog(ddsDay2cont10)"
+"0","resDay2 <- results(ddsDay2cont10, tidy = T)"
+"0","mtdata"

@@ -1,0 +1,8 @@
+"0","```r
+# Predicting a new result with Linear Regression
+predict(lin_reg, data.frame(Level = 6.5))
+
+```"
+"1","       1 
+330378.8 
+"

@@ -1,0 +1,17 @@
+"0","```r
+(colData(se) <- DataFrame(mtdata))
+
+```"
+"1","DataFrame with 9 rows and 3 columns
+                                           strains condition  resistance
+                                          <factor>  <factor>    <factor>
+no2_S10Aligned.sortedByCoord.out.bam RussetBurbank     Tuber   Resistant
+no2_S11Aligned.sortedByCoord.out.bam RussetBurbank     Tuber   Resistant
+no2_S12Aligned.sortedByCoord.out.bam RussetBurbank     Tuber   Resistant
+no2_S13Aligned.sortedByCoord.out.bam     PinkPearl     Tuber Susceptible
+no2_S14Aligned.sortedByCoord.out.bam     PinkPearl     Tuber Susceptible
+no2_S15Aligned.sortedByCoord.out.bam     PinkPearl     Tuber Susceptible
+no2_S7Aligned.sortedByCoord.out.bam   NoTuberMedia   Control     Control
+no2_S8Aligned.sortedByCoord.out.bam   NoTuberMedia   Control     Control
+no2_S9Aligned.sortedByCoord.out.bam   NoTuberMedia   Control     Control
+"

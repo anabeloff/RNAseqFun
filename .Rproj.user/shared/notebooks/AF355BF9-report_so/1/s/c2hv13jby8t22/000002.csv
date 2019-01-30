@@ -1,0 +1,4 @@
+"0","ddsDay2 <- DDSdataDESeq2(objectSE = seDay2, metaDataTable = mtdata, designFormula = ~ condition)"
+"0","ddsDay2$condition <- stats::relevel(ddsDay2$condition, ref = ""Control"")"
+"0","resDay2sh <- lfcShrink(ddsDay2, coef = resultsNames(ddsDay2)[2], type = ""apeglm"")"
+"0","resDay2 <- results(ddsDay2, tidy = F)"

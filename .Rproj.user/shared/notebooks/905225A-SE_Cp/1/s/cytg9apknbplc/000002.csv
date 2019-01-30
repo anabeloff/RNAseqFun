@@ -1,0 +1,84 @@
+"0","```r
+#!/cvmfs/soft.computecanada.ca/easybuild/software/2017/avx2/Compiler/intel2016.4/r/3.4.3/bin/Rscript
+#SBATCH -c 12                                # Number of CPUS requested. If omitted, the default is 1 CPU.
+#SBATCH --mem=204800               # Memory requested in megabytes. If omitted, the default is 1024 MB.
+#SBATCH -t 3-      # How long will your job run for? If omitted, the default is 3 hours.
+#SBATCH -N 1
+#SBATCH -n 1
+
+
+#############################################
+#Creating data table with summarizedOverlaps#
+#############################################
+
+# For future reference. 
+# some of the libraries depend on RSQLite package.
+# If RSQLite fils to install follow instructions:
+# 1. install package devtools.
+# 2. Use command:
+#       devtools::install_github(\"rstats-db/RSQLite@b-%23223-icc\")
+#
+# If this one doesn't install RSQLite, ask foe help.
+
+####################
+### IMPORTANT!!! ###
+####################
+# Make sure tob allocate enough memory or process will be terminated on cluster.
+# Rule of thumb it should be slightly more than double of total size of your .bam files.
+
+library(\"Rsamtools\")
+library(\"GenomicFeatures\")
+library(\"GenomicAlignments\")
+
+filenames <-list.files(\".\", recursive=TRUE, pattern=\"*bam$\", full=TRUE)
+#filenames <-list.files(\".\", recursive=TRUE, pattern=\"_[012]_\", full=TRUE)
+bamfiles <- BamFileList(filenames, yieldSize=200000)
+
+
+#Read annotation file
+
+# There are two posible files. 
+# One from JGI another from Cufflinks with novel genes.
+#
+# This one is for CUFFLINKS produced .gtf file
+#cpGFF <- data.frame(read.delim(\"../DESeq_analysis/merged_CPannot_all5_min_isoform.gtf\", header=F, comment.char=\"#\", quote=\"\", sep=\"\t\"))
+#Format <- \"gtf\"
+
+# This command is for original JGI gff.
+# If you don't do this modification TxDb functions canot read gene names. Have no idea why.
+cpGFF <- data.frame(read.delim(\"../../indexes/cp_genome_p29_vic3-2_MAIN.gff\", header=F, comment.char=\"#\", quote=\"\", sep=\"\t\"))
+#cpGFF <- data.frame(read.delim(\"../../indexes/Crypa2.FrozenGeneCatalog_2014_04_16.gff3\", header=F, comment.char=\"#\", quote=\"\", sep=\"\t\"))
+cpGFF$V9 <- sub(\"(\\ID=)([^|]*);\\Name=([^|]*);\\proteinid=([^|]*)\", \"\\1\\2\", cpGFF[,9])
+Format <- \"gff3\"
+
+# For both JGI and Cufflinks
+# TxDb function does not acept dot in column 7 of GFF file.
+cpGFF$V7 <- sub(\"\\.\", \"+\", cpGFF$V7)
+
+write.table(cpGFF, file=\"cp_genome_tmp.gff\", sep=\"\t\", quote=F, row.names=F, col.names=F, append = F)
+
+transdb<-makeTxDbFromGFF(\"cp_genome_tmp.gff\", format = Format, organism = \"Cryphonectria parasitica\")
+
+#Genes object, contains trascripts data from annotation.
+
+# This one for CUFFLINKS gtf
+#genes <- transcriptsBy(transdb)
+
+# This one for JGI gff
+genes <- exonsBy(transdb, by = \"gene\")
+
+print(\"Making Summarized Experiment Object...\")
+
+se <- summarizeOverlaps(features=genes, reads=bamfiles,
+                        mode=\"Union\",
+                        singleEnd=FALSE,
+                        ignore.strand=TRUE,
+                        fragments=TRUE )
+                        
+#saveRDS(se, file = \"se_rep2018_CPannot_all5_min_isoform.RData\")
+saveRDS(se, file = \"se_rep2018_JGI_exonsBygenesALL.RData\")
+print(\"SE object saved.\")
+file.remove(\"cp_genome_tmp.gff\")
+
+q(save=\"no\")
+```"

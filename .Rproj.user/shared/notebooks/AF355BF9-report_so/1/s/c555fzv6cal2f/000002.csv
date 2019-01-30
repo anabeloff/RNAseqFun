@@ -1,0 +1,31 @@
+"0","library(knitr)"
+"0","library(kableExtra)"
+"0","library(RNAseqFungi)"
+"0","#library(S4Vectors)"
+"0","#library(BiocGenerics)"
+"0","library(DESeq2)"
+"0","se <- readRDS(system.file(""extdata"", ""no2_SEgene.RData"", package = ""RNAseqFungi""))"
+"0","mtdata <- data.frame("
+"0","  strains = factor(c(rep(""RussetBurbank"", 3), rep(""PinkPearl"", 3), rep(""RussetBurbank"", 3), rep(""PinkPearl"", 3), rep(""NoTuberMedia"", 3))),"
+"0","  condition = factor(c(rep(""Tuber"", 12), rep(""Control"", 3)), levels = c(""Control"", ""Tuber"")),"
+"0","  resistance = factor(c(rep(""Susceptible"", 3), rep(""Resistant"", 3), rep(""Susceptible"", 3), rep(""Resistant"", 3), rep(""Control"", 3))),"
+"0","  day = factor(c(rep(""Day10"", 6), rep(""Day2"", 9)), levels = c(""Day2"", ""Day10"")),"
+"0","  clustering = factor(c(rep(""experiment"", 12), rep(""control"", 3)))"
+"0",")"
+"0","row.names(mtdata) <- colnames(se)"
+"0","dds <- DDSdataDESeq2(objectSE = se, metaDataTable = mtdata, designFormula = ~ day + condition)"
+"2","estimating size factors
+"
+"2","estimating dispersions
+"
+"2","gene-wise dispersion estimates
+"
+"2","mean-dispersion relationship
+"
+"2","final dispersion estimates
+"
+"2","fitting model and testing
+"
+"0","dds$condition <- stats::relevel(dds$condition, ref = ""Control"")"
+"0","rld <- rlog(dds)"
+"0","coldt <- colData(dds)"

@@ -1,0 +1,8 @@
+"0","library(knitr)"
+"0","library(kableExtra)"
+"0","library(formattable)"
+"0","library(DESeq2, quietly = TRUE)"
+"0","library(RNAseqFungi)"
+"0","library(tidyr)"
+"0","library(ggplot2)"
+"0","knitr::opts_chunk$set(echo = TRUE)"

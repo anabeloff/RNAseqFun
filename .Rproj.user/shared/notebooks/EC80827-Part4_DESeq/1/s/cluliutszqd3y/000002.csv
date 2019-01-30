@@ -1,0 +1,7 @@
+"0","rld <- rlog(dds)"
+"0","nt <- normTransform(dds)"
+"0","res <- results(dds, tidy = T)"
+"0","ressh <- lfcShrink(dds, coef = resultsNames(dds)[2], type = ""apeglm"")"
+"2","using 'apeglm' for LFC shrinkage
+"
+"0","DESeq2::plotMA(ressh, ylim=c(-2,2), alpha = 0.001)"

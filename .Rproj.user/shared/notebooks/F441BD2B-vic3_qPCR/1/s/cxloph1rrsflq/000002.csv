@@ -1,0 +1,11 @@
+"0","```r
+qpcrmf <- read.delim(system.file(\"extdata\", \"qpcr_mf.txt\", package = \"vic3PCD\"), header = T, stringsAsFactors = F)
+qpcrmf$gene <- c(rep(\"mf2-1\",5), rep(\"mf1-1\", 8), rep(\"mf2-1\",4), \"mf2-2\")
+mfmean <- dplyr::group_by(qpcrmf, category, gene) %>%
+  dplyr::summarise(variable = \"≠vic3\", value = mean(value), SE = mean(SE)) %>%
+  dplyr::filter(category == \"A\")
+mfmean <- mfmean[c(3,4,5,1,2)]
+qpcrmf <- dplyr::filter(qpcrmf, category != \"A\", gene != \"mf2-2\")
+qpcrmf <- base::rbind(data.frame(qpcrmf), data.frame(mfmean))
+#qpcrmf$variable <- factor(qpcrmf$variable, levels = unique(qpcrmf$variable))
+```"

@@ -1,0 +1,229 @@
+---
+title: "Transcriptome analysis of zoospores development in *Synchytrium endobioticum*"
+author: "Anatoly Belov"
+output:
+  pdf_document:
+    df_print: kable
+    keep_tex: yes
+  word_document: default
+bibliography: bibliography.bib
+indent: true
+---
+
+
+```{r libs, warning=FALSE, error=FALSE, message=FALSE, echo=FALSE, include=TRUE}
+library(knitr)
+library(kableExtra)
+library(formattable)
+library(DESeq2, quietly = TRUE)
+library(RNAseqFungi)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+options(knitr.table.format = "latex")
+```
+
+
+
+## I. M&M: Quality control and trimming
+
+In this study preparation of *S.endobioticum* (strain LEV6574) spores from potato warts were exposed to exudates (tuber) of susceptible (Russet Burbank) and more resistant (Pink Pearl) potato cultivar. Fungal tissue was incubated for 10 days under $16^oC$ in water media with addition of antibiotics.
+Sequencing was performed on Illumina Platform with paired-end and read length 150bp. Quality was checked using FastQC (http://www.bioinformatics.babraham.ac.uk/projects/fastqc). After quality assessment reads were trimmed with Trimmomatic v0.36 [@bolger2014trimmomatic] to about 50bp size and used for reference based alignment with STAR [@dobin2013star]. Quality of alignment was assessed with QualiMap2 [@okonechnikov2015qualimap]. Differential expression analysis was performed using R package DESeq2 [@love2014moderated].  
+ 
+Overall alignment quality was satisfactory with over 85% of reads mapped to a reference with no 3'-5' bias along genes.  
+
+
+
+```{r metadatatable, echo=FALSE}
+mtdata <- data.frame(
+  Samples = factor(c(10:12,1:7,9)),
+  strains = factor(c(rep("RussetBurbank", 6), rep("PinkPearl", 3), rep("NoTuberMedia", 2))),
+  condition = factor(c( rep("Control", 3), rep("Tuber", 6), rep("Control", 2)), levels = c("Control", "Tuber")),
+  resistance = factor(c(rep("Susceptible", 6), rep("Resistant", 3), rep("Control", 2)))
+)
+#sample_names <- paste("Sample ", seq(2,10, by = 1), sep = "")
+mtdata <- mtdata %>% dplyr::arrange(mtdata$Samples)
+
+kable(mtdata, , booktabs = T, caption = "Experiment design with day2 controls") %>%
+  kable_styling(latex_options = c("striped", "scale_up"))
+```
+
+## II. Results: Differential expression analysis
+
+Principal Component Analysis (PCA) is used to demonstrate gene expression variance on sample level. PCA helps to understand how different gene expression in samples exposed to experimental conditions compared to control.  
+  
+![Principal component analysis of gene expression on sample level.](PCAtrans.png "PCA")
+
+PCA plot demonstrates separation on PC1 axis between samples with tuber on day 2 from other samples. Clear separation between Control and Tuber clusters for day 2 allows to suggest changes in metabolic profile of *S.endobioticum* in presence of tuber.  
+Also, PCA shows that all samples on day 10 cluster together with Control samples (day2) along PC1. Here we consider that Control samples are metabolically dormant in the absence of biological external stimuli. However, exposure to tuber by day 2 causes activation of metabolism, but on day 10 fungal tissue demonstrates the same expression pattern as Control. This may indicate that process of zoospores formation activated by potato tuber lasts only several days. After that, even if potato sample is still present, wart tissue enters back into a dormant state.  
+ 
+Considering the data from PCA analysis only tuber samples from day2 demonstrates change in overall gene expression compare to Control. Thus, we used DESeq2 to identify deferentially expressed genes using only samples from Day 2 as experimental condition. On the other hand Figure 1 also clearly shows that day 10 samples exposed to Russet Burbank cluster tightly together along with two Control samples. In that regard we thought it might be beneficial to use day 10 Russet Burbank samples as additional references. Furthermore, to increase the power to our analysis we removed one outlying Control sample. In the end we get five reference samples made of two Controls and three day 10 Russet Burbank samples (see Table 1). Samples marked as Control in the condition column in Table 1 used as reference in DESeq2 analysis.  
+
+Before we move to analysis of deferentially expressed genes it is worth to discuss the matter of confidence in differential expression. It is known that genes with low counts show much higher variance in expression and therefore higher differential expression. On Figure 2a genes highlighted red with high log2 Fold Change (LFC >= 1) and green with significant p-values (p < 0.001). DESeq2 package has a function that allows to remove highly variant genes with low count number (Figure 2b). As a result we get a set of DE genes and high confidence in differential expression. However, we loose all information about genes with low expression rate, which might be important in our study. Considering that we going to use all DE genes in further analysis. However, if we draw any conclusions out to low expression genes we would need a further analysis (i.e. qPCR) to make sure they are actually deferentially expressed and not a result of natural sample variance.
+
+```{r MAplotdata, echo=FALSE, cache=TRUE, warning=FALSE, message=FALSE, error=FALSE}
+se <- readRDS(system.file("extdata", "no2_SEgene.RData", package = "RNAseqFungi"))
+seDay10cont <- se[,c(1:3,7:13,15)]
+mtdata <- data.frame(
+  strains = factor(c(rep("RussetBurbank", 6), rep("PinkPearl", 3), rep("NoTuberMedia", 2))),
+  condition = factor(c( rep("Control", 3), rep("Tuber", 6), rep("Control", 2)), levels = c("Control", "Tuber")),
+  resistance = factor(c(rep("Susceptible", 6), rep("Resistant", 3), rep("Control", 2))),
+  clustering = factor(c(rep("control", 3), rep("experiment", 6), rep("control", 2)))
+)
+row.names(mtdata) <- colnames(seDay10cont)
+
+ddsDay2 <- DDSdataDESeq2(objectSE = seDay10cont, metaDataTable = mtdata, designFormula = ~ condition)
+ddsDay2$condition <- stats::relevel(ddsDay2$condition, ref = "Control")
+
+resDay2sh <- lfcShrink(ddsDay2, coef = resultsNames(ddsDay2)[2], type = "apeglm")
+resDay2 <- results(ddsDay2, tidy = F)
+
+```
+
+```{r MAplot, echo=FALSE, fig.width=12}
+ressig_lfc <- resDay2[abs(resDay2$log2FoldChange) >= 1,]
+ressig_pval <- resDay2[resDay2$pvalue <= 0.01,]
+
+ressig_sh_lfc <- resDay2sh[abs(resDay2sh$log2FoldChange) >= 1,]
+ressig_sh_pval <- resDay2sh[resDay2sh$pvalue <= 0.01,]
+
+par(mfrow = c(1,2), mar=c(2.5,4,4,1))
+plot(log2(resDay2$baseMean), resDay2$log2FoldChange, ylim=c(-2,2) , col = "azure3", pch = 20, main = "A. Before shrinkage", xlab = "Mean Expression", ylab = "Log2 Fold Change")
+points(log2(resDay2[rownames(ressig_pval),"baseMean"]), resDay2[rownames(ressig_pval),"log2FoldChange"], col = "forestgreen", pch = 20)
+points(log2(resDay2[rownames(ressig_lfc),"baseMean"]), resDay2[rownames(ressig_lfc),"log2FoldChange"], col = "firebrick2", pch = 21)
+plot(log2(resDay2sh$baseMean), resDay2sh$log2FoldChange, ylim=c(-2,2) , col = "azure3", pch = 20, main = "B. After shrinkage", xlab = "Mean Expression", ylab = "Log2 Fold Change")
+points(log2(resDay2sh[rownames(ressig_sh_pval),"baseMean"]), resDay2sh[rownames(ressig_sh_pval),"log2FoldChange"], col = "forestgreen", pch = 20)
+points(log2(resDay2sh[rownames(ressig_sh_lfc),"baseMean"]), resDay2sh[rownames(ressig_sh_lfc),"log2FoldChange"], col = "firebrick2", pch = 21)
+title("Figure 2. MA plots for day 2 samples", line = -1, outer = TRUE)
+
+```
+
+
+Table 2 shows data for day 2 samples with Controls from day2 and day10. As previously discussed we included in our analysis genes with low counts (normalized count shown in baseMean column), but with high LFC values. As seen genes with relatively high LFC (LFC >= 1) do not have significant p-values (p < 0.01 highlighted green). To see full set of DE genes see supplementary Tables.
+
+```{r day2table, echo=FALSE}
+groupsDay2cont10 <- readRDS(system.file("extdata", "groupsDay2cont10.rda", package = "RNAseqFungi"))
+
+groupsDay2cont10 <- groupsDay2cont10 %>%
+  dplyr::filter(abs(log2FoldChange) >= 1, pvalue < 0.1) %>%
+#  dplyr::filter(abs(baseMean) >= 20) %>%
+  dplyr::arrange(desc(log2FoldChange)) %>%
+  dplyr::mutate(log2FoldChange = round(log2FoldChange, 2),
+                Mean = round(Mean, 2),
+                pvalue = base::signif(pvalue, digits = 3),
+                baseMean = round(baseMean, 2)) %>%
+  dplyr::mutate(pvalue = cell_spec(pvalue, , color = ifelse(pvalue <= 0.01,"#1a9850", "#bdbdbd")),
+                log2FoldChange = cell_spec(log2FoldChange, , color = ifelse(log2FoldChange >= 0,"#b2182b", "#4393c3")),
+                Mean = cell_spec(Mean, , color = ifelse(Mean >= 0,"#b2182b", "#4393c3")))
+
+
+groupsDay2cont10$Protein.names <- ifelse(is.na(groupsDay2cont10$Protein.names), NA, base::paste(base::substr(groupsDay2cont10$Protein.names, 1, 38), "...", sep = ""))
+groupsDay2cont10 <- groupsDay2cont10[c("gene_id", "groups", "Mean", "baseMean", "log2FoldChange", "pvalue", "gene_id_Sprot", "Score.x", "Protein.names")]
+groupsDay2cont10$gene_id <- gsub("_", "\\\\_", groupsDay2cont10$gene_id)
+groupsDay2cont10$Protein.names <- gsub("\\[|\\]|\\(|\\)|_", "", groupsDay2cont10$Protein.names)
+
+colnames(groupsDay2cont10) <- c("geneIDs", "HC", "Mean","BM", "LFC", "p-val", "UniProt", "Score", "Protein Names")
+groupsDay2cont10[is.na(groupsDay2cont10)] <- " "
+
+# FootNotes
+names(groupsDay2cont10)[2] <- paste0(names(groupsDay2cont10)[2], footnote_marker_number(1, , double_escape = F))
+names(groupsDay2cont10)[3] <- paste0(names(groupsDay2cont10)[3], footnote_marker_number(2, , double_escape = F))
+names(groupsDay2cont10)[4] <- paste0(names(groupsDay2cont10)[4], footnote_marker_number(3, , double_escape = F))
+names(groupsDay2cont10)[5] <- paste0(names(groupsDay2cont10)[5], footnote_marker_number(4, , double_escape = F))
+names(groupsDay2cont10)[7] <- paste0(names(groupsDay2cont10)[7], footnote_marker_number(5, , double_escape = F))
+
+kable(groupsDay2cont10, , escape = F, linesep = "", booktabs = T, longtable = F, caption = "Differentially expressed genes in day 2 samples") %>%
+  kable_styling(latex_options = c("striped", "scale_down", "repeat_header"), font_size = 6, full_width = T) %>%
+  column_spec(1, bold = T) %>%
+  column_spec(9, width = "5.3cm") %>%
+  column_spec(c(2,6,7), width = "1cm") %>%
+  column_spec(c(3,4,5,8), width = "0.6cm") %>%
+  footnote(number = c("HC - Hierarchical clustering", "Mean - average differential expression (log2 fold scale)", "BM - Base Mean normilized count, calculated by DESeq2",  "LFC - log 2 Fold change, calculated by DESeq2", "UniProt - gene IDs from UniProt SwissProt. Annotated by BLAST", "Score - BLAST bitscore"))
+
+```
+
+Table 3 shows DE genes when DESeq2 shrinkage option is applied. There is only 9 genes go over a threshold as deferentially expressed. Also, there is not much room for hierarchical clustering (see below), so genes are divided into 2 clusters up- and down-regulated genes.  
+  
+```{r day2table shrink, echo=FALSE}
+groupsDay2sh <- readRDS(system.file("extdata", "groupsDay2cont10sh.rda", package = "RNAseqFungi"))
+
+groupsDay2sh <- groupsDay2sh %>%
+  dplyr::filter(abs(log2FoldChange) >= 0, pvalue < 0.1) %>%
+  dplyr::arrange(desc(log2FoldChange)) %>%
+  dplyr::mutate(log2FoldChange = round(log2FoldChange, 2),
+                Mean = round(Mean, 2),
+                pvalue = base::signif(pvalue, digits = 3),
+                baseMean = round(baseMean, 2)) %>%
+  dplyr::mutate(pvalue = cell_spec(pvalue, , color = ifelse(pvalue <= 0.01,"#1a9850", "#bdbdbd")),
+                log2FoldChange = cell_spec(log2FoldChange, , color = ifelse(log2FoldChange >= 0,"#b2182b", "#4393c3")),
+                Mean = cell_spec(Mean, , color = ifelse(Mean >= 0,"#b2182b", "#4393c3")))
+
+
+groupsDay2sh$Protein.names <- ifelse(is.na(groupsDay2sh$Protein.names), NA, base::paste(base::substr(groupsDay2sh$Protein.names, 1, 38), "...", sep = ""))
+groupsDay2sh$gene_id <- gsub("_", "\\\\_", groupsDay2sh$gene_id)
+groupsDay2sh$Protein.names <- gsub("\\[|\\]|\\(|\\)|_", "", groupsDay2sh$Protein.names)
+groupsDay2sh <- groupsDay2sh[c("gene_id", "groups", "Mean", "baseMean", "log2FoldChange", "pvalue", "gene_id_Sprot", "Score.x", "Protein.names")]
+colnames(groupsDay2sh) <- c("geneIDs", "HC", "Mean","BM", "LFC", "p-val", "UniProt", "Score", "Protein Names")
+groupsDay2sh[is.na(groupsDay2sh)] <- " "
+
+
+kable(groupsDay2sh, , escape = F, linesep = "", booktabs = T, caption = "Differentially expressed genes in day 2 samples after LFC shrinkage") %>%
+  kable_styling(latex_options = c("striped", "scale_down", "repeat_header"), font_size = 6, full_width = T) %>%
+  column_spec(1, bold = T) %>%
+  column_spec(9, width = "5.3cm") %>%
+  column_spec(c(2,6,7), width = "1cm") %>%
+  column_spec(c(3,4,5,8), width = "0.6cm")
+```
+
+**Hierarchical clustering**. Considering that shrunk dataset left us with only 9 genes we going to use data without shrinkage function in HC analysis. In basic experiment setup with two conditions (control and treatment) we would expect HC to form at least two robust gene clusters (up- and down-regulated). However, in our dataset we using two  conditions: resistant and susceptible potato + Control. In that case we might expect at least four clusters. Where each up- and down-regulated cluster will be divided on two, with high and low variance between samples for each condition. Using HC analysis we can identify if resistant and susceptible potato samples demonstrate any differences in gene differential expression.  
+  
+Figure 2 shows hierarchical clustering of 85 DE genes estimated by DESeq2 where we identified 8 robust clusters. As seen many genes demonstrated high level of variance between samples, what is expected from low count genes. The most informative gene clusters in this analysis are those with low variance, as they may represent processes responsible for zoospores activation signaling. Another point of HC analysis to identify gene clusters with variance in expression between experimental conditions. On Figure 2 we can see that Cluster 3 shows notable variance between Susceptible and Resistant tubers.
+
+![Hierarchical clustering of deferentially expressed genes in day 2 samples. Clusters were identified using average of euclidean distances of gene expression. A) Heat map of 85 DE genes in 6 samples forming 8 robust clusters. B) Heat map showing average DE for each cluster in individual samples. Var - indicates gene expression variance in cluster on sample level. Russet Burbank (resistant) and Pink Pearl (susceptible) potato.](hc_so.png "Hierarchical clustering of day 2 samples")
+
+
+## IV. Disscussion: Exploring data set on gene level
+
+In this section we'll discuss particular examples of deferentially expressed genes shown in Tables 2 and 3. These examples can be used as targets for future studies of processes related to zoospores formation and *S. endobioticum* molecular signaling. As discussed previously, from the point of HC analysis there are two main gene groups of interest. Ones that cluster with low variance between samples and ones that show difference between experiments.  
+First group are genes most likely related to molecular signaling of zoospores formation. Second group includes Clusters 3 and 7, where we see high variance between Susceptible and Resistant tuber experiments. In study we used the same fungal strain for all conditions, thus observed variance in Clusters 3 and 7 demonstrates reaction on fungus to different chemical signaling from potato tubers.  
+Finally, as seen in Table 2, dowregulated genes show very insignificant (p > 0.01) differential expression. Thus in further discussion we going to explore only upregulated genes. Upregulated genes are the likely candidates for further studies and as biological markers.  
+
+#### Main processes and related genes
+
+The most reliable data on differential expression shown in Table 3. However, both Table 2 and 3, show that genes with highest overexpression rate (IDs: SeLEV6574_g08262, SeLEV6574_g01882, SeLEV6574_g01889, SeLEV6574_g04936, SeLEV6574_g08409, SeLEV6574_g07724) are related to DNA replication and repair. Among them, SeLEV6574_g08262 probable fungal endonuclease involved in DNA replication and repair, showed highest rate of upregulation. Ortholog of CPSase protein (SeLEV6574_g07724) contains Carbamoyl-phosphate synthase domain, which involved in urea cycle, arginine and pyrimidine biosynthesis [@guy1994cloning]. Previous data also indicates that CPSase is trascriptionally regulated by glucocorticoids and/or cAMP [@schoneveld2007cyclicamp]. Activation of DNA replication may indicate that on second day of tuber exposure fungal tissue undergoes active cell division.  
+
+Downregulated genes represent the most abundant and least significant (p > 0.01) fraction in our dataset (Table 2 and 4, Figure 2). Only one significant downregulated gene appears in the Table 3. SeLEV6574_g07808, belongs to mentioned above group of DNA replication genes, is an ortholog of arginine N-methyltransferase protein and involved in Histone H4 methylation.  
+
+Other upregulated genes indicate activation of processes associated with substrate degradation and nutrients acquisition. Here, gene with highest differential expression encodes for a type of Phosphoenolpyruvate carboxykinase (PCK) (ID: SeLEV6574_g05843). Closer BLAST analysis  showed that this gene has high level of similarity to other PCKs from unicellular fungi, like *C. abilcans*. This indicates that UniProtID annotation appears to be largely correct. PCK is involved in gluconeogenenisis, process of glucose biosynthesis from non-carbohydrate substrate. Some literature indicates that PCK gene in mammals is transcriptionally regulated in presence of a substrate [@hanson1997regulation]. Activation of PCK gene may lead to a hypothesis that fungus maybe recycling its own tissue to supply developing zoospores with energy.  
+
+Cytochrome b5 domain gene (SeLEV6574_g05461) in plants and fungi is associated with redox reactions, commonly with nitrates assimilation [@crawford1988sequence]. Closer BLAST search showed that SeLEV6574_g05461 sequence is closely related to fungal Fumarate reductase Osm1 (UniProt ID:B8MQI5) and Galactose-binding-like domain-containing protein (UniProt ID:A0A075B1F6). Both are poorly characterized, so the function SeLEV6574_g05461 remains inconclusive. However, in general Cytochrome b5 domain genes are involved in processes associated with cell membrane and redox reactions on sugary substrates. This allows us to suggest that SeLEV6574_g05461 may play a role in receptor systems activated by presense of sugary substances from tuber.  
+
+Another upregulated gene SeLEV6574_g04584 appears of particular interest. It was annotated as CFA (Cilia- and Flagella-associated protein, UniProt ID:D6REC4) from *H. sapiens*, but considering limitations of UniProt Reviewed database we performed additional BLAST search. Its results indicated that gene is more related to fungal general purpose MSF substrate transporters, but all were lacking detailed annotation. However, even considering poor annotation of fungal proteins we still can suggest that SeLEV6574_g04584 may in fact be a flagella-associated protein. Previous data indicates that evolution and function of flagellum is strongly associated with transport function [@Rosenbaum:200243c]. Cytological studies indicate that Cilia and flagella have active transport systems that move materials and absorbed compounds in both directions along microtubule [@mitchell2007evolution]. Considering this we can suggest that SeLEV6574_g04584 is a part of flagella apparatus and can possibly be used as marker of zoospores development.  
+
+![Expression rates of genes mentioned in this section. Graph shows gene normilised counts in log2 scale for individual samples. Orage dots show samples exposed to tuber and blue dots are control samples.](genes_expression_plot_day2cont10.png "Sig genes")
+
+#### Marker genes
+
+Candidate genes for markers of zoospore formation must show significant and high change in differential expression. Good marker gene would demonstrate high transcript accumulation during spore development and lack of expression in control strains.  
+In data we gathered the only genes satisfying those criteria are shown in Table 3. Among them two Histone genes (IDs: SeLEV6574_g01882 and SeLEV6574_g01889) show expression pattern perfect for qPCR detection. On the other hand these genes generally indicate activation of DNA replication in general that might not be related to zoospores development. In that regard Flagella gene CFA (ID:SeLEV6574_g04584) may present a better marker for zoospores activation, as it is functionally related more related. However, main advantage CFA is stable abundant transcript accumulation with reliable rate of differential expression.  
+
+Another group of potential genes of interest is in Cluster 3 (Figure 2, Supplementary Table 1). These genes show high upregulation in Pink Pearl samples and may indicate reaction *S.endobioticum* to resistant tuber. Interestingly, two genes from this cluster (SeLEV6574_g06863 and SeLEV6574_g01614) show no significant hits to any known protein in databases.  
+Two other genes from Cluster 3 both annotated as DNA ligase (SeLEV6574_g02078 and SeLEV6574_g02095, UniProt ID:Q0AZZ5). Its upregulation may indicate higher rates of DNA repair required in samples exposed to Pink Pearl variety. Although it is not clear if DNA ligase is trascriptionally regulated. This high upregulation of DNA repair may suggest higher toxicity of the media with resistant tuber [@helleday2007dna;@chapman2012playing]. Here we can suggest that tubers produce different types of toxic compounds to deter parasites and as result we see high activation of defense mechanisms in fungus. Further steps should be taken to identify the differences in secondary metabolites production between susceptible and resistant potato varieties. 
+
+## III. Notes: RNA-seq experiment design and preparation 
+
+- RNA-seq analysis is very similar to qPCR in terms of experimental design. Relative estimation of RNA accumulation requires a reference. In qPCR references are usually housekeeping genes (like 18S rRNA), main feature of those genes is constant expression rate in all conditions organism is exposed to. In RNA-seq analysis gene expression  of entire sample used as reference. This adds a lot of sampling variance which affects the final result. Try to be very careful and cautious in setting and collecting control samples. Ideally control samples must represent stable (normal) well studied state of the specimen. 
+- Considering the price of NGS it might not be possible to make many biological replicas, but in normal scenario each type of samples (control and experiment) must have at least 3 biological replicas.  
+- For each experimental condition there must be a control sample (including replicas). In simple case if your experiment has only one condition (for example, exposure to a chemical) then you got to prepare at least 6 RNA samples for further sequencing (1). If you want to see effects of the treatment in time for each treated sample you must have a control sample for each time step. Considering 3 replicas rule this creates 6 samples for each time point (2).  
+
+\[ (treatment \times 3) + (control \times 3) = 6 \qquad (1) \]
+\[ 2 \: timespoints \times ((treatment \times 3) + (control \times 3)) = 12 \qquad (2) \]
+
+- How to collect biological replicas. Take tissue samples from the same specimen(s) that have been exposed to the same conditions and in the same stage of development.  Basically, an ideal scenario to create 3 biological replicas is to extract RNA from one specimen material divided in 3 (or whatever number of replicas) pieces. In every organism there is a natural variability in gene expression. It depends on environmental conditions and stage of development. This can largely affect the RNA-seq analysis and lead to type 1 errors, especially for control samples.  
+- All samples you use for NGS RNA sequencing must have the same amount of RNA. Basic estimate of RNA amount is 50-60ul of ddH2O with 500-1000ng of RNA in each sample.  
+- Depth of sequencing 70-100M considered good for experiments with sizable mammal genomes, thus for organisms with smaller genomes it is possible to get results with lesser depth.  
+
+
+## References:
+

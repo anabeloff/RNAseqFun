@@ -1,0 +1,19 @@
+"0","```r
+pdf(file = \"PCAgene_ALL.pdf\", height = 12, width = 10)
+pcaPl
+dev.off()
+
+```"
+"1","null device 
+          1 
+"
+"0","```r
+png(filename = \"PCAgene_ALL.png\", height = 700, width = 900)
+pcaPl
+```"
+"0","```r
+dev.off()
+```"
+"1","null device 
+          1 
+"

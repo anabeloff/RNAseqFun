@@ -1,0 +1,22 @@
+"0","```r
+se <- readRDS(\"inst/extdata/no2_SEgene.RData\")
+mtdata <- data.frame(
+  strains = factor(c(rep(\"RussetBurbank\", 3), rep(\"PinkPearl\", 3), rep(\"RussetBurbank\", 3), rep(\"PinkPearl\", 3), rep(\"NoTuberMedia\", 3))),
+  condition = factor(c(rep(\"Tuber\", 12), rep(\"Control\", 3))),
+  resistance = factor(c(rep(\"Susceptible\", 3), rep(\"Resistant\", 3), rep(\"Susceptible\", 3), rep(\"Resistant\", 3), rep(\"Control\", 3))),
+  day = factor(c(rep(\"Day10\", 6), rep(\"Day2\", 9)), levels = c(\"Day2\", \"Day10\"))
+)
+row.names(mtdata) <- colnames(se)
+(colData(se) <- DataFrame(mtdata))
+head(assay(se))
+ddsSE <- DESeqDataSet(se, design = ~ condition + day)
+dds <- DESeq(ddsSE)
+keep <- rowSums(counts(dds)) >= 10
+dds <- dds[keep,]
+
+rld <- rlog(dds)
+#vsd <- varianceStabilizingTransformation(dds)
+nt <- normTransform(dds)
+#res <- results(dds, lfcThreshold = 2, altHypothesis = \"greaterAbs\")
+res <- results(dds, tidy = T)
+```"

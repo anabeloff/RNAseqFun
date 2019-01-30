@@ -1,0 +1,25 @@
+"0","```r
+GFF <- data.frame(read.delim(\"inst/extdata/Se_LEV6574.gff\", header=F, comment.char=\"#\", quote=\"\", sep=\"\t\"))
+#GFF <- data.frame(read.delim(\"inst/extdata/Se_LEV6574.gtf\", header=F, comment.char=\"#\", quote=\"\", sep=\"\t\"))
+GFF$V9 <- gsub(\"(\\ID=)([^|]*);\\Name=([^|]*)\", \"\\1\\2\", GFF[,9])
+GFF<- GFF[GFF$V3 != \"start_codon\",]
+GFF<- GFF[GFF$V3 != \"stop_codon\",]
+
+#GFF$V7 <- sub(\"\\.\", \"+\", GFF$V7)
+
+
+plusGFF<- GFF[GFF$V7 == \"-\",]
+Format <- \"gff3\"
+#Format <- \"gtf\"
+
+
+write.table(GFF, file=\"tmp.gff\", sep=\"\t\", quote=F, row.names=F, col.names=F, append = F)
+
+transdb<-makeTxDbFromGFF(\"tmp.gff\", format = Format, organism = \"Synchytrium endobioticum\")
+file.remove(\"tmp.gff\")
+
+
+GFF <- parseGFF(gff = \"inst/extdata/Se_LEV6574.gff\", field = c(\"ID\", \"Name\"))
+GFF <- GFF[GFF$feature == \"gene\",]
+a <- GFF[!is.na(GFF$Name),]
+```"

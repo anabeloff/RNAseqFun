@@ -1,0 +1,8 @@
+"0","```r
+# Using the dendrogram to find the optimal number of clusters
+dendrogram = hclust(d = dist(dataset, method = 'euclidean'), method = 'ward.D')
+plot(dendrogram,
+     main = paste('Dendrogram'),
+     xlab = 'Customers',
+     ylab = 'Euclidean distances')
+```"

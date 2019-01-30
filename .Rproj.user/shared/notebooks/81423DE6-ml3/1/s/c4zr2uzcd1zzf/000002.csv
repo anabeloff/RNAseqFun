@@ -1,0 +1,25 @@
+"0","```r
+regressor = lm(formula = Profit ~ R.D.Spend + Marketing.Spend,
+               data = dataset)
+summary(regressor)
+```"
+"1","
+Call:
+lm(formula = Profit ~ R.D.Spend + Marketing.Spend, data = dataset)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-33645  -4632   -414   6484  17097 
+
+Coefficients:
+                 Estimate Std. Error t value Pr(>|t|)    
+(Intercept)     4.698e+04  2.690e+03  17.464   <2e-16 ***
+R.D.Spend       7.966e-01  4.135e-02  19.266   <2e-16 ***
+Marketing.Spend 2.991e-02  1.552e-02   1.927     0.06 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 9161 on 47 degrees of freedom
+Multiple R-squared:  0.9505,	Adjusted R-squared:  0.9483 
+F-statistic: 450.8 on 2 and 47 DF,  p-value: < 2.2e-16
+"

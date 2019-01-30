@@ -1,0 +1,1 @@
+"0","plot(log2(resDay2sh$baseMean), resDay2sh$log2FoldChange, ylim=c(-2,2) , col = ""azure3"", pch = 20, main = ""B. After shrinkage"", xlab = ""Mean Expression"", ylab = ""Log2 Fold Change"")"

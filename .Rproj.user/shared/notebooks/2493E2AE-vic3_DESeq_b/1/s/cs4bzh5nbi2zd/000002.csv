@@ -1,0 +1,5 @@
+"0","```r
+#ressig <- selectGenes(pattern = ptrn[[1]], value = ptrn[[2]], dataTable = nt, annotationTbl = list(mainTbl))
+ressig <- selectGenes(pattern = ptrn[[1]], value = ptrn[[2]], dataTable = list(nt, ntN), annotationTbl = list(mainTbl, mainTbl_novel))
+ressig
+```"

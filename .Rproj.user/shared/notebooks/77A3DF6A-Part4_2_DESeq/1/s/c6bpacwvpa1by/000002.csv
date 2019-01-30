@@ -1,0 +1,4 @@
+"0","a <- inner_join(groupsDay2sh, groupsDay2cont10sh)
+"
+"2","Joining, by = c(""no2_S1Aligned.sortedByCoord.out.bam"", ""no2_S2Aligned.sortedByCoord.out.bam"", ""no2_S3Aligned.sortedByCoord.out.bam"", ""no2_S4Aligned.sortedByCoord.out.bam"", ""no2_S5Aligned.sortedByCoord.out.bam"", ""no2_S6Aligned.sortedByCoord.out.bam"", ""Mean"", ""groups"", ""gene_id"", ""baseMean"", ""log2FoldChange"", ""lfcSE"", ""pvalue"", ""padj"", ""gene_id_Sprot"", ""identity"", ""length"", ""mismatch"", ""gaps"", ""start"", ""end"", ""gene_id_start"", ""gene_id_end"", ""evalue.x"", ""Score.x"", ""gene_id_TrEMBl"", ""evalue.y"", ""Score.y"", ""Entry.name"", ""Protein.names"", ""Gene.names"", ""Organism"", ""Gene.ontology..biological.process."", ""Pathway"", ""Cross.reference..InterPro."", ""Cross.reference..Pfam."")
+"

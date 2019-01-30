@@ -1,0 +1,9 @@
+"0","```r
+colnames(se)
+
+```"
+"1"," [1] \"no2_S10Aligned.sortedByCoord.out.bam\" \"no2_S11Aligned.sortedByCoord.out.bam\" \"no2_S12Aligned.sortedByCoord.out.bam\" \"no2_S13Aligned.sortedByCoord.out.bam\"
+ [5] \"no2_S14Aligned.sortedByCoord.out.bam\" \"no2_S15Aligned.sortedByCoord.out.bam\" \"no2_S1Aligned.sortedByCoord.out.bam\"  \"no2_S2Aligned.sortedByCoord.out.bam\" 
+ [9] \"no2_S3Aligned.sortedByCoord.out.bam\"  \"no2_S4Aligned.sortedByCoord.out.bam\"  \"no2_S5Aligned.sortedByCoord.out.bam\"  \"no2_S6Aligned.sortedByCoord.out.bam\" 
+[13] \"no2_S7Aligned.sortedByCoord.out.bam\"  \"no2_S8Aligned.sortedByCoord.out.bam\"  \"no2_S9Aligned.sortedByCoord.out.bam\" 
+"

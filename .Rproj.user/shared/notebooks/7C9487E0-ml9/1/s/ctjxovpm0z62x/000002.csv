@@ -1,0 +1,5 @@
+"0","```r
+# Importing the dataset
+dataset = read.csv('machineLearning_data/Part3_classification/K_Nearest_Neighbors/Social_Network_Ads.csv')
+dataset = dataset[3:5]
+```"

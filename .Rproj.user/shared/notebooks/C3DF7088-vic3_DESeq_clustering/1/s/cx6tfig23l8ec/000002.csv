@@ -1,0 +1,16 @@
+"0","```r
+groups <- clusterGenes2(dataTable = list(nt, ntN),
+                        annotationTbl = list(mainTbl, mainTbl_novel),
+                        clusterColumns = c(8:12),
+                        summarise_clusters = T,
+                        value = 2,
+                        cutTree = 19,
+                        distRows = \"euclidean\",
+                        clusterMethod = \"average\",
+                        clusterNames = NULL,
+                        annot = annot_dds[c(10,11,13:15),])
+
+```"
+"1","the condition has length > 1 and only the first element will be usedAnnotation not provided.Error in clusterGenes2(dataTable = list(nt, ntN), annotationTbl = list(mainTbl,  : 
+  Use colData from DESeq analysis!
+"
