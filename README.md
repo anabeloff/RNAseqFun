@@ -12,13 +12,16 @@ Package developed by Anatoly Belov for Dr. H. Nguyen lab under the project "Tran
 The usage of the package starts after user is created SummarisedExperiment (SE) object out of BAM files. The package contains example datasets of SE object to use in a test run. To see instructions on how to create SE for `RNAseqFungi` see notebooks Part 3.  
 
 
-- Step 1: Loading SE object and creatin meta data dataframe.  
+### Step 1: Loading SE object  
 
 ```
 se <- readRDS(system.file("extdata", "SEgene.RData", package = "RNAseqFungi"))
 
 ```
-When creating metadata table it is important to remember following:  
+
+### Step 2: creating meta data table.
+
+When creating metadata table it is important to remember the following:  
 
 - Row names of the metadata table should be the same as sample names in the columns of 'SE' object.
 - **IMPORTANT!** Make sure to check row names asigned to a correct annotation columns.
@@ -39,6 +42,8 @@ mtdata <- data.frame(
 row.names(mtdata) <- colnames(seDay10cont)
 
 ```
+### Step 3: creating dds object.
+
 Next use `DDSdataDESeq2` function to create a `DESeq2` container `dds`.  
 This function is a basic wrapper for standard `DESeq2` protocol. It includes following steps:  
 
