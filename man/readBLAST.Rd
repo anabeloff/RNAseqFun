@@ -5,7 +5,7 @@
 Read BLAST output
 }
 \description{
-Functions reads BLAST tabulated (6) output format files. It outputs data.frame with standard column names. readBLAST also allows to filter by Bit Score or evalue.
+Functions reads BLAST tabulated (6) output format files. It outputs data.frame with standard names and content types (character or numeric). readBLAST also allows to filter data by providing Bit Score or evalue threshold.
 }
 \usage{
 readBLAST(blastFile,
@@ -16,7 +16,7 @@ readBLAST(blastFile,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{blastFile}{
-Path to BLAST out put file.
+Path to BLAST tab file.
 }
   \item{bitScore}{
 Numeric. If specified sets a threshold value for BitScore. Only lines above the threshold will be outputted. Default NA.
@@ -42,7 +42,7 @@ Data frame. If specified joins annotation data frame with BLAST output. It uses 
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Anatoly Belov
 }
 \note{
 %%  ~~further notes~~
@@ -54,14 +54,17 @@ Data frame. If specified joins annotation data frame with BLAST output. It uses 
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+## Read BLAST file without filtering.
+blastData <- readBLAST(blastFile = system.file("extdata", "so_proteins_blastx.tab", package = "RNAseqFungi"))
 
-## The function is currently defined as
-function (x)
-{
-  }
+## Read BLAST file without and filter data.
+## By e-value
+blastData <- readBLAST(blastFile = system.file("extdata", "so_proteins_blastx.tab", package = "RNAseqFungi"),
+                        eValue = 0.0001)
+
+## By bit score
+blastData <- readBLAST(blastFile = system.file("extdata", "so_proteins_blastx.tab", package = "RNAseqFungi"),
+                        bitScore = 200)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

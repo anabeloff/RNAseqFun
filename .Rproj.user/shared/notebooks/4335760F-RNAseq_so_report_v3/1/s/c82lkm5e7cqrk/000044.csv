@@ -1,1 +1,0 @@
-"0","points(log2(resDay2sh[rownames(ressig_sh_lfc),""baseMean""]), resDay2sh[rownames(ressig_sh_lfc),""log2FoldChange""], col = ""firebrick2"", pch = 21)"

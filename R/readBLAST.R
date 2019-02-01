@@ -8,8 +8,6 @@ readBLAST <- function(blastFile,
                       eValue = NA,
                       annotationTbl = NA) {
 
-  #bt - BLAST treshold. Used to filter blast results.
-  #blastdb - BLAST databse
 
   blast.read.data <- read.delim(blastFile,
                                 header = F,

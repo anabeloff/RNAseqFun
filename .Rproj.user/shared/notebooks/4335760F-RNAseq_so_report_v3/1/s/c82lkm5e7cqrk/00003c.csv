@@ -1,1 +1,0 @@
-"0","points(log2(resDay2[rownames(ressig_pval),""baseMean""]), resDay2[rownames(ressig_pval),""log2FoldChange""], col = ""forestgreen"", pch = 20)"

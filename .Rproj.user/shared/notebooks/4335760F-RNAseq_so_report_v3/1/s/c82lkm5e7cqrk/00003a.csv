@@ -1,6 +1,0 @@
-"0","ressig_lfc <- resDay2[abs(resDay2$log2FoldChange) >= 1,]"
-"0","ressig_pval <- resDay2[resDay2$pvalue <= 0.001,]"
-"0","ressig_sh_lfc <- resDay2sh[abs(resDay2sh$log2FoldChange) >= 1,]"
-"0","ressig_sh_pval <- resDay2sh[resDay2sh$pvalue <= 0.001,]"
-"0","par(mfrow = c(1,2), mar=c(2.5,4,4,1))"
-"0","plot(log2(resDay2$baseMean), resDay2$log2FoldChange, ylim=c(-2,2) , col = ""azure3"", pch = 20, main = ""A. Before shrinkage"", xlab = ""Mean Expression"", ylab = ""Log2 Fold Change"")"
