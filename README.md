@@ -5,6 +5,7 @@ See R notebooks Part 4 for details on usage.
 
 Package developed by Anatoly Belov for Dr. H. Nguyen lab under the project "Transcriptome analysis of zoospores development in *Synchytrium endobioticum*".
 
+<<<<<<< HEAD
 
 ## Basic usage
 
@@ -62,3 +63,5 @@ Also, package includes several general usage functions to work with standard dat
 For more information see notebooks.
 
 
+=======
+>>>>>>> a44d9aa8a0d2c6e21c06c424746a9be5de175788
