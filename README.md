@@ -62,6 +62,3 @@ Also, package includes several general usage functions to work with standard dat
 
 For more information see notebooks.
 
-
-=======
->>>>>>> a44d9aa8a0d2c6e21c06c424746a9be5de175788
