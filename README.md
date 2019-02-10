@@ -9,7 +9,7 @@ Package developed by Anatoly Belov for Dr. H. Nguyen lab under the project "Tran
 
 ## Basic usage
 
-The usage of the package starts after user is created SummarisedExperiment (SE) object out of BAM files. The package contains example datasets of SE object to use in a test run. To see instructions on how to create SE for `RNAseqFungi` see notebooks Part 3.  
+The usage of the package starts after user is created SummarisedExperiment (SE) object out of BAM files. The package contains example datasets of SE object to use in a test run. To see instructions on how to create SE for `RNAseqFungi` see manual.  
 
 
 ### Step 1: Loading SE object  
@@ -60,7 +60,7 @@ res <- results(ddsDay2, tidy = F)
 
 ```
 
-Further functionality of `RNAseqFungi` includes Hierarchical clustering analysis using `clusterGenes` function (see manual and notebooks Part 4 for more details). `clusterGenes` function outputs dataframe with clustering results and plot using `pheatmap` package. 
+Further functionality of `RNAseqFungi` includes Hierarchical clustering analysis using `clusterGenes` function (see manual Part 4 for more details). `clusterGenes` function outputs dataframe with clustering results and plot using `pheatmap` package. 
 
 Also, package includes several general usage functions to work with standard data formats. For example, manual includes instrustions to assign annotation from BLAST to a specific gene IDs from GFF file. Resulting annotation table then can be provided as an option to `clusterGenes` function.  
 
