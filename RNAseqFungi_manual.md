@@ -2,25 +2,27 @@ RNAseqFungi: Detailed Manual
 ================
 
 There are four parts in this document describing step by step the analysis of RNA-seq data from *Synchytrium endobioticum*.
-All procedures were done on AWS cloud using several Docker containers designed for this project. All container can be found [here on GitHub](https://github.com/anabeloff/docker_images).
+All procedures were done on AWS cloud using several Docker containers designed for this project. All containers can be found [here on GitHub](https://github.com/anabeloff/docker_images).
 
-In general there are two types of BASH scripts here. "OnInstance" scripts initiate an instance and run script which initiates Docker container. "InContainer" scripts designed to run inside Docker container and included in the image. What means, if you change "InContainer" script you need to rebuild a Docker image.
+In general there are two types of scripts associated with each container run. "OnInstance" scripts initiate an instance and run script which initiates Docker container. "InContainer" scripts designed to run inside Docker container and included in the image. All scripts used in this project can be found in this package 'extdata' directory.
 
 Part 0: Docker images and AWS instances
 ---------------------------------------
 
-Here is a quick introduction into building Docker container from image and AWS cloud.
+Here is a quick introduction into building Docker containers and AWS cloud.
 If you don't have images in Docker on your machine, go to [GitHub repository](https://github.com/anabeloff/docker_images) and download folder you need. Then `cd` inside required directory on your machine. There you can find multiple files or directories, but often it's just one, called `Dockerfile`.
-Run following command inside directory to compile the container called 'rrnaseq':
+For example, run following command inside directory to compile the image for container 'rrnaseq':
 
 ### Build Docker image
+
+All Docker containers used in this project can be found in [GitHub repository](https://github.com/anabeloff/docker_images).
 
 ``` bash
 docker build -t rrnaseq .
 ```
 
 Image compilation may take some time.
-If you planning to run Docker on AWS platform use ECR service to store Docker images. Each repository in ECR has a button 'push commands', which will show instructions to push container from local machine to ECR repository.
+If you are planning to run Docker on AWS platform use ECR service to store Docker images. Each repository in ECR has a button 'push commands', which will show instructions to push container from local machine to ECR repository.
 In this case there will be 4 commands:
 
 ``` bash
@@ -41,10 +43,9 @@ docker push 123456789.dkr.ecr.ca-central-1.amazonaws.com/rrnaseq:latest
 Basic script template to run on AWS instance.
 
 ``` bash
-UDATA="$( cat <<EOF
-#!/bin/bash
- ## Important system variables
 
+## Important system variables
+## These must be outside of 'UDATA' variable.
    
     # System image
     # Amazon Linux version from 2018
@@ -59,6 +60,9 @@ UDATA="$( cat <<EOF
     # PRICE 0.288
     INSTANCE_TYPE="r5d.xlarge"
     THREADS=4
+
+UDATA="$( cat <<EOF
+#!/bin/bash
 
   # Insert BASH script here.
 
@@ -81,24 +85,20 @@ aws ec2 run-instances \
 
 AWS `run-instances` command includes option `--user-data` which allows to supply a script which going to be run after instance is initiated. In case of provided example above we put script into `$UDATA` variable using `EOF` trick. Otherwise you can save script into a file and put a path in `--user-data` option.
 
-Options `--security-group-ids` and `--key-name` you have to figure out yourself following AWS manual.
+Options `--security-group-ids` and `--key-name` you have to figure out yourself following AWS manuals on [Security groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html) and [Keys](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html).
 
-Option `--image-id` specifies the OS image. I generally recommend using Amazon Linux if you going to run Docker. In example is a private image of Amazon Linux with pre-installed and updated Docker.
+Option `--image-id` specifies the OS image. I generally recommend using Amazon Linux if you going to run Docker. In this example my private image of Amazon Linux with pre-installed and updated Docker is used.
 
 `--instance-type` To run efficient analysis with large files like NGS data choose instances with SSD drive. On these instances, **REMEMBER** all data on SSD will be lost upon shutdown. Data on system drive will remain intact if instance was stopped.
 
-When running `aws` command on newly created instance you always have to provide credentials to access data in your account. To avoid doing it every time on each instance create a Role with rights to use specific or all AWS services. Then you can specify this Role for newly created instance with option `--iam-instance-profile Name="UltimateRole"`.
+When running `aws` command on newly created instance you always have to provide credentials to access data in your account. To avoid doing it every time on each instance create a [Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html) with rights to use specific or all AWS services. Then you can specify the name of this Role for newly created instance with option `--iam-instance-profile`. In this example I called it "UltimateRole".
 
 Finally, `--instance-initiated-shutdown-behavior` option is here to specify behavior on shutdown. Default is 'stop', what means instance can be restarted in the future. But if you want to use instance only once, then provide 'terminate' option. Just remember, when you using instance with SSD drive all data on it will be lost upon shutdown even if the instance was just 'stopped', not 'terminated'. Data on system drive will remain intact if instance was stopped. Termination will remove all traces of instance existence.
-
-### Docker containers
-
-All Docker containers used in this project can be found in [GitHub repository](https://github.com/anabeloff/docker_images).
 
 Part 1: Quality control and trimming
 ------------------------------------
 
-Initial step of every NGS project is a quality check. In this project we going to analyse initial FASTQ files and alignment BAM quality.
+Initial step of every NGS project is a quality check. This part describes a pipeline which allows to run initial quality check on FASTQ files, Trimming and alignment BAM quality.
 This section is a first step of the analysis and concentrated on FASTQ files.
 
 Usual procedure with unknown files is to run quality check -&gt; trimm -&gt; run quality check again. This is an interactive procedure and doesn't fit as part of a longer pipeline. Quality control and trimming is done here by three tools:
