@@ -8,12 +8,12 @@ Package developed by Anatoly Belov for Dr. H. Nguyen lab under the project "Tran
 
 ## Basic usage
 
-The usage of the package starts after user is created SummarisedExperiment (SE) object out of BAM files. The package contains example datasets of SE object to use in a test run. To see instructions on how to create SE for `RNAseqFungi` see manual.  
+The usage of the package starts after user is created SummarisedExperiment (SE) object out of BAM files. The package contains example SE objects to use in a test run. To see instructions on how to create SE for `RNAseqFungi` see manual.  
 
 
 ### Step 1: Loading SE object  
 
-```
+``` r
 se <- readRDS(system.file("extdata", "SEgene.RData", package = "RNAseqFungi"))
 
 ```
@@ -31,7 +31,7 @@ For `RNAseqFungi` package following column names **MUST** be included in metadat
 - "condition": identifying Control and Test samples.
 - "clustering": similar to "condition", this column specifies control and test conditions, only here **MUST** be used only two "control" and "experiment". This part of the table is used by clustering function.
 
-```
+``` r
 mtdata <- data.frame(
   strains = factor(c(rep("RussetBurbank", 6), rep("PinkPearl", 3), rep("NoTuberMedia", 2))),
   condition = factor(c( rep("Control", 3), rep("Tuber", 6), rep("Control", 2)), levels = c("Control", "Tuber")),
@@ -50,7 +50,7 @@ This function is a basic wrapper for standard `DESeq2` protocol. It includes fol
 - Uses `DESeqDataSet` and `DESeq` functions to create `dds` according to provided formula.
 - Filters out sequences with less than 10 reads.
 
-```
+``` r
 dds <- DDSdataDESeq2(objectSE = seDay10cont, metaDataTable = mtdata, designFormula = ~ condition)
 dds$condition <- stats::relevel(ddsDay2$condition, ref = "Control")
 
@@ -64,5 +64,5 @@ Further functionality of `RNAseqFungi` includes Hierarchical clustering analysis
 Also, package includes several general usage functions to work with standard data formats. For example, manual includes instrustions to assign annotation from BLAST to a specific gene IDs from GFF file. Resulting annotation table then can be provided as an option to `clusterGenes` function.  
 
 
-For more information see notebooks.
+For more information see [Detailed manual](https://github.com/anabeloff/RNAseqFungi/blob/master/RNAseqFungi_manual.md).
 
