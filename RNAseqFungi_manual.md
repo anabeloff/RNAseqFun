@@ -153,9 +153,9 @@ In addition `PROJECT_DIR` variable should be directed to STAR output directory i
 Part 3: Creating Summarized Experiment for DESeq2 analysis
 ----------------------------------------------------------
 
-Creating Summarized Experiment (SE) is the first step in running RNA-seq analysis in R. It separated from other R scripts as this step is computationally heavy and it's better be run on large AWS instance or HPC environment.
+Creating Summarized Experiment (SE) is the first step of running RNA-seq analysis in R. It separated from other R scripts as this step is computationally heavy and it's better be run on large AWS instance or HPC environment.
 
-In this step we take BAM files for all samples in analysis, combine it with GFF data to produce single R S4 object that going to in the center of further pipeline. Similarly to previous parts pipeline is made of two scripts.
+In this step we take BAM files for all samples in analysis, combine it with GFF data to produce single S4 object that going to in the center of further pipeline. Similarly to previous parts pipeline is made of two scripts.
 
 > OnInstance\_SEobject.sh Starts instance and pulls Docker container -&gt; OnContainer\_SEobject.R creates a SEobjest and saves it to RData file.
 
@@ -313,7 +313,7 @@ In previous section PCA clustering showed clear separation between day2 and day1
 *IMPORTANT!* To use clustering function provided with the package MetaData table must include column called 'clustering'. This column must include factor with two levels: 'control' and 'experiment'. Samples identified as experiment will be used for clustering analysis.
 
 ``` r
-groupsDay2cont10 <- clusterGenes(dds = ddsDay2cont10,
+groups <- clusterGenes(dds = dds,
                         annotationTbl = annotation_Tbl,
                         clusterColumns = NA,
                         summarise_clusters = FALSE,
