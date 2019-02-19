@@ -192,6 +192,145 @@ GFF<- GFF[GFF$V3 != "start_codon",]
 GFF<- GFF[GFF$V3 != "stop_codon",]
 ```
 
+Part 4: using RNAseqFungi package
+---------------------------------
+
+When you created SE object save it as '.RData' so you can continue work on your local RStudio. Following steps wont require much of computing resources.
+
+### Step 1: SE objects
+
+For this project several SE objects provided as external data.
+
+1.  'no2\_SEgene.RData' - main object used in the report.
+2.  'no2\_SEgene\_ALL.RData' - SE object with all samples used (including one with only media).
+3.  'no2\_SEgene\_day10.RData' - only Day 10 samples and Day 2 NoTuber controls.
+4.  'no2\_SEgene\_day2.RData' - only day 2 samples.
+5.  'no2\_SEgene\_res.RData' - Day2 and 10 for resistant tuber (Pink Pearl).
+6.  'no2\_SEgene\_sus.RData' - Day2 and 10 for susceptible tuber (Russet Burbank).
+
+Basic command to upload SE object in R.
+
+``` r
+se <- readRDS(system.file("extdata", "no2_SEgene.RData", package = "RNAseqFungi"))
+```
+
+### Step 2: Meatadata table
+
+Now when you have SE object in your environment, it's time to create meta data. The table must outline the experiment design you had in mind from the beginning. It must provide information about Controls, test samples and other possible conditions. Generally to run analysis with DESeq2 you are free to create metadata table with arbitrary names and tags. However, to take advantage of functions provided in `RNAseqFungi` package metadata table *MUST* include specific column names and tags.
+
+-   "strains": Types of strains of individual sample names.
+-   "condition": identifying Control and Test samples. Use only two tags here.
+-   "clustering": basically a mirror of "condition" column. Only in this column you **MUST** use only two tags "control" and "experiment". This part of the table is used by clustering function.
+
+``` r
+mtdata <- data.frame(
+  strains = factor(c(rep("RussetBurbank", 6), rep("PinkPearl", 3), rep("NoTuberMedia", 2))),
+  condition = factor(c( rep("Control", 3), rep("Tuber", 6), rep("Control", 2)), levels = c("Control", "Tuber")),
+  resistance = factor(c(rep("Susceptible", 6), rep("Resistant", 3), rep("Control", 2))),
+  clustering = factor(c(rep("control", 3), rep("experiment", 6), rep("control", 2)))
+)
+row.names(mtdata) <- colnames(seDay10cont)
+```
+
+These are *MUST* columns, but you free to add more.
+
+### Step 3: DESeq2 data object
+
+Now we can start using DESeq2. The final product of the package is usually called `dds` object, containing all calculated expression and initial data. The usual sequence of steps is presented by following code:
+
+``` r
+# Adding metadata to SE object
+(colData(se) <- DataFrame(mtdata))
+
+# Adding SE and design formula to DESeq2
+ddsSE <- DESeqDataSet(se, design = ~ condition)
+
+# Creating DDS object
+dds <- DESeq(ddsSE)
+
+# Filtering genes by read count
+# Only genes with more than 10 reads alined are kept in the data.
+keep <- rowSums(counts(dds)) >= 10
+dds <- dds[keep,]
+```
+
+To make this step easier `RNAseqFungi` has function `DDSdataDESeq2`. It performs the same steps only in one line of code.
+
+``` r
+dds <- DDSdataDESeq2(objectSE = se, metaDataTable = mtdata, designFormula = ~ condition)
+```
+
+Another important step is to make sure that DESeq2 knows which tag in 'condition' column represents reference samples (control). You can specify it by ordering factor levels in the column. Then DESeq2 will take first level as control. But DESeq2 manual is not really clear on that part in my opinion. So, to be completely sure you specified right tag as a control use following command.
+
+``` r
+dds$condition <- stats::relevel(ddsDay2$condition, ref = "Control")
+```
+
+Finally, to get results use following code.
+
+``` r
+res <- results(ddsDay2, tidy = F)
+```
+
+This will output a dataframe with differential expression data. Refer to DESeq2 manual to know more about the object.
+
+### Step 4: PCA analysis
+
+First step in RNA-seq analysis is to perform Principal Component Analysis (PCA) with all samples gene count data. This step allows to see if there is a reason to continue the analysis further. If samples form distinctive clusters, then there got to be significant difference in gene expression.
+To draw PCA plot use standard DESeq2 function `plotPCA`. This function uses `ggplot2` package, so it's easy to modify output.
+
+``` r
+coldt <- colData(dds)
+rld <- rlog(dds)
+
+clr = c("azure3", "darkseagreen4", "coral3", "dodgerblue3")
+names(clr) <- unique(coldt[,"strains"])
+
+pcaPl <- plotPCA(rld, intgroup = c("strains")) +
+ geom_point(shape=19, size = 12) +
+  geom_point(shape=21, size = 12, colour = "lightsteelblue4") +
+  scale_colour_manual(values=clr, name = "Tuber:") +
+  geom_text(label = coldt[, "day"], size = 4, colour = "black", fontface = "italic", hjust = 0, nudge_x = 0.4) +
+  xlim(-6, 6) +
+  theme(panel.background=element_rect(fill="white"),
+        legend.key = element_rect(fill = "white", color = "white"),
+        title=element_text(size=18,colour="black"), 
+        axis.title=element_text(size=15,colour="black"),
+        axis.text=element_text(size=15, colour="#000000"),
+        axis.text.y = element_text(hjust = 0),
+        text=element_text(size=18,colour="#000000"),
+        panel.grid.major=element_line(size=0.5,colour="#BFBFBF",linetype = "dotted"),
+        panel.grid.minor=element_line(size=0.5,colour="#BFBFBF",linetype = "dotted"),
+        panel.border = element_rect(fill = NA, colour = "#BFBFBF"),
+        legend.position="right",
+        panel.margin = unit(1, "lines"))
+pcaPl
+```
+
+![Principal component analysis of gene expression on sample level.](PCAtrans.png "PCA") \#\#\# Step 5: Hierarchical clustering
+
+In previous section PCA clustering showed clear separation between day2 and day10 tuber samples. Considering that day 10 samples are not different from controls we concentrate our analysis efforts on samples from day 2. To lower the variability in sample set we excluded sample 8 (control) leaving only 2 control replicas. To increase the power of the analysis we added samples 10-12 (Susceptible tuber day 10) as control. Samples 10-12 showed low level of variability on PC2 and clustered well with remaining two controls.
+
+*IMPORTANT!* To use clustering function provided with the package MetaData table must include column called 'clustering'. This column must include factor with two levels: 'control' and 'experiment'. Samples identified as experiment will be used for clustering analysis.
+
+``` r
+groupsDay2cont10 <- clusterGenes(dds = ddsDay2cont10,
+                        annotationTbl = annotation_Tbl,
+                        clusterColumns = NA,
+                        summarise_clusters = FALSE,
+                        value = 1,
+                        cutTree = 8,
+                        distRows = "euclidean",
+                        clusterMethod = "average",
+                        clusterNames = NULL,
+                        shrinkLFC = F,
+                        test = F)
+```
+
+![Hierarchical clustering of deferentially expressed genes in day 2 samples. Clusters were identified using average of euclidean distances of gene expression. A) Heat map of 85 DE genes in 6 samples forming 8 robust clusters. B) Heat map showing average DE for each cluster in individual samples. Var - indicates gene expression variance in cluster on sample level. Russet Burbank (resistant) and Pink Pearl (susceptible) potato.](hc_so.png "Hierarchical clustering of day 2 samples")
+
+The `clusterGenes` functions has two basic modes, controlled by `summarise_clusters` option. First shown on figure above in panel A, is default `FALSE`. It outputs data for all deferentially expressed genes in the set and ordering them by tree. If `summarise_clusters=TRUE` then it produces summarized clusters. Basically, showing average differential expression in each cluster for individual test samples.
+
 References
 ----------
 
