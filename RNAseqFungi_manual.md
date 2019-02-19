@@ -306,11 +306,13 @@ pcaPl <- plotPCA(rld, intgroup = c("strains")) +
 pcaPl
 ```
 
-![Principal component analysis of gene expression on sample level.](PCAtrans.png "PCA") \#\#\# Step 5: Hierarchical clustering
+![Principal component analysis of gene expression on sample level.](PCAtrans.png "PCA")
+
+### Step 5: Hierarchical clustering
 
 In previous section PCA clustering showed clear separation between day2 and day10 tuber samples. Considering that day 10 samples are not different from controls we concentrate our analysis efforts on samples from day 2. To lower the variability in sample set we excluded sample 8 (control) leaving only 2 control replicas. To increase the power of the analysis we added samples 10-12 (Susceptible tuber day 10) as control. Samples 10-12 showed low level of variability on PC2 and clustered well with remaining two controls.
 
-*IMPORTANT!* To use clustering function provided with the package MetaData table must include column called 'clustering'. This column must include factor with two levels: 'control' and 'experiment'. Samples identified as experiment will be used for clustering analysis.
+**IMPORTANT!** To use clustering function provided with the package MetaData table must include column called 'clustering'. This column must include factor with two levels: 'control' and 'experiment'. Samples identified as experiment will be used for clustering analysis.
 
 ``` r
 groups <- clusterGenes(dds = dds,
