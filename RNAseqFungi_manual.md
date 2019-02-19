@@ -10,12 +10,11 @@ Part 0: Docker images and AWS instances
 ---------------------------------------
 
 Here is a quick introduction into building Docker containers and AWS cloud.
-If you don't have images in Docker on your machine, go to [GitHub repository](https://github.com/anabeloff/docker_images) and download folder you need. Then `cd` inside required directory on your machine. There you can find multiple files or directories, but often it's just one, called `Dockerfile`.
-For example, run following command inside directory to compile the image for container 'rrnaseq':
+If you don't have images in Docker on your machine, go to [GitHub repository](https://github.com/anabeloff/docker_images) and download folder you need. Then `cd` inside required directory on your machine. There you can find multiple files or directories, but often it's just one `Dockerfile`.
 
 ### Build Docker image
 
-All Docker containers used in this project can be found in [GitHub repository](https://github.com/anabeloff/docker_images).
+All Docker containers used in this project can be found in [GitHub repository](https://github.com/anabeloff/docker_images). For example, run following command inside directory to compile the image for container 'rrnaseq':
 
 ``` bash
 docker build -t rrnaseq .
