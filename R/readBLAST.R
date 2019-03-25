@@ -27,7 +27,7 @@ readBLAST <- function(blastFile,
   blast.data <- blast.read.data %>%
     dplyr::group_by(queryID) %>%
     dplyr::filter(Score == max(Score) & evalue == min(evalue)) %>%
-    dplyr::summarise_all(funs(first))
+    dplyr::summarise_all(funs(dplyr::first))
 
   if(!is.na(annotationTbl)) {
     names(annotationTbl)[1] <- "queryID"

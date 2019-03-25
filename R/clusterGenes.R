@@ -81,7 +81,8 @@ message("Creating pheatmap...", appendLF = T)
           # Manual colors for heatmap annotation
           annot <- base::data.frame(colData(dds))
 
-          str = RColorBrewer::brewer.pal(n = length(unique(annot$strains)), name ="Greys")
+          #str = RColorBrewer::brewer.pal(n = length(unique(annot$strains)), name ="Greys")
+          str = colorRampPalette(brewer.pal(n = 9, name ="Greys"))(length(unique(annot$strains)))
           names(str) <- levels(annot$strains)
           clCut = colorRampPalette(brewer.pal(n = 12, name ="Paired"))(cutTree)
           names(clCut) <- clusterNames
