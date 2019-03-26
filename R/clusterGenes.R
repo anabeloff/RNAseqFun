@@ -48,7 +48,7 @@ message("done", appendLF = T)
 
   if(is.na(clusterColumns)) {
     coldt <- SummarizedExperiment::colData(dds)
-    clusterColumns <- row.names(coldt[coldt$clustering == "experiment",])
+    clusterColumns <- base::row.names(coldt[coldt$clustering == "experiment",])
   }
 
   dst <- dist(htmdt[,clusterColumns], method = distRows)
@@ -79,7 +79,7 @@ message("Creating pheatmap...", appendLF = T)
           }
 
           # Manual colors for heatmap annotation
-          annot <- base::data.frame(colData(dds))
+          annot <- base::data.frame(SummarizedExperiment::colData(dds))
 
           #str = RColorBrewer::brewer.pal(n = length(unique(annot$strains)), name ="Greys")
           str = colorRampPalette(brewer.pal(n = 9, name ="Greys"))(length(unique(annot$strains)))
@@ -94,10 +94,11 @@ message("Creating pheatmap...", appendLF = T)
 
           # Clusters Summary
           if(summarise_clusters == T) {
-                    annot <- annot[annot$clustering == "experiment",]
+            #annot <- annot[annot$clustering == "experiment",]
+            annot <- annot[clusterColumns,]
 
                     main_mt <- data.frame(htmdt[,c(clusterColumns, "Mean")])
-                    main_mt$groups <- clusterCut[match(rownames(htmdt), names(clusterCut))]
+                    main_mt$groups <- clusterCut[match(base::row.names(htmdt), names(clusterCut))]
                     for(o in c(1:cutTree)) {
                       main_mt$groups <- gsub(paste("^", o, "$", sep = ""), clusterNames[o], main_mt$groups)
                     }
@@ -110,15 +111,14 @@ message("Creating pheatmap...", appendLF = T)
 
 
                     annot_row <- data.frame(Clusters = factor(main_mt$groups))
-                    rownames(annot_row) <- annot_row$Clusters
+                    base::row.names(annot_row) <- annot_row$Clusters
                     main_mt <- as.matrix(main_mt[,-1])
-                    dimnames(main_mt) <- list(annot_row$Clusters, c(row.names(annot), "Mean"))
+                    dimnames(main_mt) <- list(annot_row$Clusters, c(base::row.names(annot), "Mean"))
 
                     main_mt <- main_mt[order(rowMeans(main_mt), decreasing = T),]
                     Variance = round(apply(main_mt, 1, var), digits = 3)
                     main_mt <- cbind(main_mt,Variance)
-                    #dst <- dist(main_mt, method = distRows)
-                    #clusters <- hclust(dst, method = clusterMethod)
+
                     clusters <- F
                     display_numbers <- TRUE
 
@@ -139,7 +139,7 @@ message("Creating pheatmap...", appendLF = T)
                    annotation_colors = annot_clr,
                    display_numbers = display_numbers, fontsize_number = 10, number_color = "dodgerblue4",
                    cluster_rows = clusters, cutree_rows = cutTree, treeheight_row = 80,
-                   cellwidth = 40) #, cellheight = 2, clustering_distance_rows = distRows, clustering_method = clusterMethod)
+                   cellwidth = 40)
 
 message("done", appendLF = T)
 
@@ -148,7 +148,7 @@ message("done", appendLF = T)
   ressig <- data.frame(htmdt[,c(clusterColumns, "Mean")])
 
   # Cluster names
-  ressig$groups <- clusterCut[match(row.names(ressig), names(clusterCut))]
+  ressig$groups <- clusterCut[match(base::row.names(ressig), names(clusterCut))]
 
   for(o in c(1:cutTree)) {
     ressig$groups <- gsub(paste("^", o, "$", sep = ""), clusterNames[o], ressig$groups)
@@ -156,8 +156,8 @@ message("done", appendLF = T)
 
 
   res <- base::as.data.frame(res)
-  res$gene_id <- row.names(res)
-  ressig$gene_id <- row.names(ressig)
+  res$gene_id <- base::row.names(res)
+  ressig$gene_id <- base::row.names(ressig)
   ressig <- dplyr::left_join(ressig, res, by = "gene_id")
 
   # Annotation table join

@@ -1,11 +1,10 @@
 Package: RNAseqFungi
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
+Title: RNAseq data with DESeq2
+Version: 0.1.1
 Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Maintainer: Anatoly Belov <anabeloff@gmail.com>
+Description: This package is a wrapper for standard DESeq2 data analysis pipeline. 
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
