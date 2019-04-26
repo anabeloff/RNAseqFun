@@ -8,7 +8,7 @@ Package developed by Anatoly Belov for Dr. H. Nguyen lab under the project "Tran
 
 ## Basic usage
 
-The usage of the package starts after user is created SummarisedExperiment (SE) object out of BAM files. The package contains example SE objects to use in a test run. To see instructions on how to create SE for `RNAseqFungi` see manual.  
+The usage of the package starts after when SummarisedExperiment (SE) object is created. The package contains example SE objects to use in a test run. To see instructions on how to create SE for `RNAseqFungi` see manual.  
 
 
 ### Step 1: Loading SE object  
