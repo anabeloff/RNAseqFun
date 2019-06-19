@@ -200,12 +200,9 @@ When you created SE object save it as '.RData' so you can continue work on your 
 
 For this project several SE objects provided as external data.
 
-1.  'no2\_SEgene.RData' - main object used in the report.
-2.  'no2\_SEgene\_ALL.RData' - SE object with all samples used (including one with only media).
-3.  'no2\_SEgene\_day10.RData' - only Day 10 samples and Day 2 NoTuber controls.
-4.  'no2\_SEgene\_day2.RData' - only day 2 samples.
-5.  'no2\_SEgene\_res.RData' - Day2 and 10 for resistant tuber (Pink Pearl).
-6.  'no2\_SEgene\_sus.RData' - Day2 and 10 for susceptible tuber (Russet Burbank).
+1.  'no2\_SEgene.RData' - main object used in the report includes all samples except "media".
+2.  'no2\_SEgene\_ALL.RData' - SE object with all samples used (including one with only "media").
+
 
 Basic command to upload SE object in R.
 
@@ -213,7 +210,7 @@ Basic command to upload SE object in R.
 se <- readRDS(system.file("extdata", "no2_SEgene.RData", package = "RNAseqFungi"))
 ```
 
-### Step 2: Meatadata table
+### Step 2: Meatadata table and Annotation
 
 Now when you have SE object in your environment, it's time to create meta data. The table must outline the experiment design you had in mind from the beginning. It must provide information about Controls, test samples and other possible conditions. Generally to run analysis with DESeq2 you are free to create metadata table with arbitrary names and tags. However, to take advantage of functions provided in `RNAseqFungi` package metadata table *MUST* include specific column names and tags.
 
@@ -223,15 +220,20 @@ Now when you have SE object in your environment, it's time to create meta data. 
 
 ``` r
 mtdata <- data.frame(
-  strains = factor(c(rep("RussetBurbank", 6), rep("PinkPearl", 3), rep("NoTuberMedia", 2))),
-  condition = factor(c( rep("Control", 3), rep("Tuber", 6), rep("Control", 2)), levels = c("Control", "Tuber")),
-  resistance = factor(c(rep("Susceptible", 6), rep("Resistant", 3), rep("Control", 2))),
-  clustering = factor(c(rep("control", 3), rep("experiment", 6), rep("control", 2)))
+  strains = factor(c(rep("RussetBurbank", 3), rep("PinkPearl", 3), rep("RussetBurbank", 3), rep("PinkPearl", 3), rep("NoTuberMedia", 3))),
+  condition = factor(c(rep("Tuber", 12), rep("Control", 3))),
+  resistance = factor(c(rep("Susceptible", 3), rep("Resistant", 3), rep("Susceptible", 3), rep("Resistant", 3), rep("Control", 3))),
+  day = factor(c(rep("Day10", 6), rep("Day2", 9)), levels = c("Day2", "Day10"))
 )
-row.names(mtdata) <- colnames(seDay10cont)
+row.names(mtdata) <- colnames(se)
 ```
 
 These are *MUST* columns, but you free to add more.
+
+Annotation table for *Synchytrium* supplied with the package. To upload it use following code.
+``` r
+annotation_Tbl <- readRDS(system.file("extdata", "synchytrium_annotation.rda", package = "RNAseqFungi"))
+```
 
 ### Step 3: DESeq2 data object
 
@@ -262,13 +264,17 @@ dds <- DDSdataDESeq2(objectSE = se, metaDataTable = mtdata, designFormula = ~ co
 Another important step is to make sure that DESeq2 knows which tag in 'condition' column represents reference samples (control). You can specify it by ordering factor levels in the column. Then DESeq2 will take first level as control. But DESeq2 manual is not really clear on that part in my opinion. So, to be completely sure you specified right tag as a control use following command.
 
 ``` r
-dds$condition <- stats::relevel(ddsDay2$condition, ref = "Control")
+dds$condition <- stats::relevel(dds$condition, ref = "Control")
 ```
 
 Finally, to get results use following code.
 
 ``` r
+# Results table from DESeq2
 res <- results(ddsDay2, tidy = F)
+
+# Relog counts
+rld <- rlog(dds)
 ```
 
 This will output a dataframe with differential expression data. Refer to DESeq2 manual to know more about the object.
@@ -280,7 +286,6 @@ To draw PCA plot use standard DESeq2 function `plotPCA`. This function uses `ggp
 
 ``` r
 coldt <- colData(dds)
-rld <- rlog(dds)
 
 clr = c("azure3", "darkseagreen4", "coral3", "dodgerblue3")
 names(clr) <- unique(coldt[,"strains"])
