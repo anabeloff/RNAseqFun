@@ -335,7 +335,7 @@ groups <- clusterGenes(dds = dds,
 
 ![Hierarchical clustering of deferentially expressed genes in day 2 samples. Clusters were identified using average of euclidean distances of gene expression. A) Heat map of 85 DE genes in 6 samples forming 8 robust clusters. B) Heat map showing average DE for each cluster in individual samples. Var - indicates gene expression variance in cluster on sample level. Russet Burbank (resistant) and Pink Pearl (susceptible) potato.](hc_so.png "Hierarchical clustering of day 2 samples")
 
-The `clusterGenes` functions has two basic modes, controlled by `summarise_clusters` option. First shown on figure above in panel A, is default `FALSE`. It outputs data for all deferentially expressed genes in the set and ordering them by tree. If `summarise_clusters=TRUE` then it produces summarized clusters. Basically, showing average differential expression in each cluster for individual test samples.
+The `clusterGenes` function has two basic modes, controlled by `summarise_clusters` option. The default setting (`FALSE`) shown on figure above in a panel A. It outputs data for all deferentially expressed genes in the set and ordering them by tree. If `summarise_clusters = TRUE` then it produces summarized clusters. Basically, showing average differential expression in each cluster for individual test samples.
 
 References
 ----------
