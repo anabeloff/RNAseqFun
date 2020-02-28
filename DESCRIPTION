@@ -1,16 +1,17 @@
-Package: RNAseqFungi
+Package: RNAseqFun
 Type: Package
-Title: RNAseq data with DESeq2
+Title: RNAseq data analysis with DESeq2 and EdgeR
 Version: 0.1.1
 Author: Anatoly Belov
 Maintainer: Anatoly Belov <anabeloff@gmail.com>
-Description: This package is a wrapper for RNAseq analysis using DESeq2. The entry point is a SummarizedExperiment object (SE). Package contains wrapper function to quickly create a DESeq2 object following standard protocol. Package contains function to create hierarchical clustering plot and dataframe. Also there collection of standard functions to add data from standard formats. These include functions to read BLAST tab format, which allows to filter input by bit score or evalue. Function parseGFF allow to convert GFF file to dataframe and parse specified annotation sections into columns.
+Description: This package is a wrapper for RNAseq analysis using DESeq2 and EdgeR packages. The entry point is a SummarizedExperiment object (SE). Package contains wrapper functions to quickly create a DESeq2 object following standard protocol. Package contains function to create hierarchical clustering plot and dataframe. Also there collection of standard functions to add data from standard formats. These include functions to read BLAST tab format, which allows to filter input by bit score or evalue. Function parseGFF allow to convert GFF file to dataframe and parse specified annotation sections into columns.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
     dplyr,
     DESeq2,
+    edgeR,
     pheatmap,
     ggplot2,
     RColorBrewer
