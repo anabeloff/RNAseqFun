@@ -7,6 +7,7 @@
 
 
 clusterGenes <- function(value = 0,
+                         pvalue = 0.1,
                           clusterColumns = NA,
                           summarise_clusters = FALSE,
                           cutTree = NA,
@@ -37,7 +38,7 @@ message("Selecting genes...", appendLF = T)
 
   # Select data Table
 
-  expressionData <- exprData(value = value, ds = dds, shrinkLFC = shrinkLFC)
+  expressionData <- exprData(value = value, pvalue = pvalue, ds = dds, shrinkLFC = shrinkLFC)
   htmdt <- expressionData[[1]]
   res <- expressionData[[2]]
 
@@ -105,7 +106,7 @@ message("Creating pheatmap...", appendLF = T)
 
                     main_mt <- main_mt %>%
                       dplyr::group_by(groups) %>%
-                      dplyr::summarise_all(funs(mean))
+                      dplyr::summarise_all(list(mean))
 
                     rownames(main_mt) <- main_mt$groups
 

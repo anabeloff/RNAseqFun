@@ -2,6 +2,7 @@
 
 # function to normilise expression data from DESeq2 before plotting.
 exprData <- function(value = NULL,
+                     pvalue = 0.1,
                      ds = NA,
                      logChange = "absolute",
                      shrinkLFC = FALSE,
@@ -41,8 +42,6 @@ exprData <- function(value = NULL,
 
         htmdt <- base::cbind(htmdt, base::rowMeans(htmdt[,experiments]))
         colnames(htmdt)[length(colnames(htmdt))] <- "Mean"
-  } else {
-
   }
 
   #removing inf numbers
@@ -62,7 +61,7 @@ exprData <- function(value = NULL,
   if(isTRUE(shrinkLFC)) {
     res <- lfcShrink(ds, coef = resultsNames(ds)[2], type = "apeglm")
   } else {
-    res <- results(ds)
+    res <- DESeq2::results(ds)
     res[is.na(res$log2FoldChange), "log2FoldChange"] <- 0
     res[res$log2FoldChange == -Inf,2] <- minV-1
     res[res$log2FoldChange == Inf,2] <- maxV+1
@@ -71,32 +70,35 @@ exprData <- function(value = NULL,
 
 
   #Selection for Downregulated, upregulated genes, or both (default).
-  #For any other instance it will select by adjusted p-value.
-  if(logChange == "absolute") {
-    ressig <- res[abs(res$log2FoldChange) >= value,]
-  } else if(logChange == "up") {
-    ressig <- res[res$log2FoldChange >= value,]
-  } else if(logChange == "down") {
-    ressig <- res[res$log2FoldChange <= -value,]
-  } else if((logChange == "p-value")) {
-    ressig <- res[!is.na(res$padj) & res$padj <= value,]
-  } else {
-    stop("logChange parameter is not correct! \n Use: \n 'absolute' - to sort genes by Log2fold change and include all, down and up regulated genes. \n
-        'up' -  to sort genes by Log2fold change and include only Upregulated genes. \n
-        'down' - to sort genes by Log2fold change and include only Downregulated genes.\n
-        'p-value' - to sort by column 'padj' (adjusted p-value) in DESeq2 data set and include all, down- and upregulated genes.")
-  }
+  res$log2FoldChange <- round(res$log2FoldChange, 1)
+  res <- res[res$pvalue < pvalue,]
 
-  sel <- rownames(ressig[order(ressig$log2FoldChange, decreasing = T),])
+  res <- res[abs(res$log2FoldChange) >= value,]
+
+  # #For any other instance it will select by adjusted p-value.
+  # if(logChange == "absolute") {
+  #   res$log2FoldChange <- round(res$log2FoldChange, 1)
+  #   ressig <- res[abs(res$log2FoldChange) >= value,]
+  # } else if(logChange == "up") {
+  #   ressig <- res[res$log2FoldChange >= value,]
+  # } else if(logChange == "down") {
+  #   ressig <- res[res$log2FoldChange <= -value,]
+  # } else if((logChange == "p-value")) {
+  #   ressig <- res[!is.na(res$padj) & res$padj <= value,]
+  # } else {
+  #   stop("logChange parameter is not correct! \n Use: \n 'absolute' - to sort genes by Log2fold change and include all, down and up regulated genes. \n
+  #       'up' -  to sort genes by Log2fold change and include only Upregulated genes. \n
+  #       'down' - to sort genes by Log2fold change and include only Downregulated genes.\n
+  #       'p-value' - to sort by column 'padj' (adjusted p-value) in DESeq2 data set and include all, down- and upregulated genes.")
+  # }
+
+  sel <- rownames(res[order(res$log2FoldChange, decreasing = T),])
   htmdt <- htmdt[sel,]
 
 
   htmdt <- base::as.matrix(htmdt)
-  #ressig <- base::as.data.frame(ressig)
 
-  finalDT <- list(htmdt, ressig)
+  finalDT <- list(htmdt, res)
 
   return(finalDT)
 }
-
-#a <- exprData(nt, value = 2)

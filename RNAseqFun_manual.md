@@ -1,4 +1,4 @@
-RNAseqFungi: Detailed Manual
+RNAseqFun: Detailed Manual
 ================
 
 There are four parts in this document describing step by step the analysis of RNA-seq data from *Synchytrium endobioticum*.
@@ -191,7 +191,7 @@ GFF<- GFF[GFF$V3 != "start_codon",]
 GFF<- GFF[GFF$V3 != "stop_codon",]
 ```
 
-Part 4: using RNAseqFungi package
+Part 4: using RNAseqFun package
 ---------------------------------
 
 When you created SE object save it as '.RData' so you can continue work on your local RStudio. Following steps wont require much of computing resources.
@@ -207,12 +207,12 @@ For this project several SE objects provided as external data.
 Basic command to upload SE object in R.
 
 ``` r
-se <- readRDS(system.file("extdata", "no2_SEgene.RData", package = "RNAseqFungi"))
+se <- readRDS(system.file("extdata", "no2_SEgene.RData", package = "RNAseqFun"))
 ```
 
 ### Step 2: Meatadata table and Annotation
 
-Now when you have SE object in your environment, it's time to create meta data. The table must outline the experiment design you had in mind from the beginning. It must provide information about Controls, test samples and other possible conditions. Generally to run analysis with DESeq2 you are free to create metadata table with arbitrary names and tags. However, to take advantage of functions provided in `RNAseqFungi` package metadata table *MUST* include specific column names and tags.
+Now when you have SE object in your environment, it's time to create meta data. The table must outline the experiment design you had in mind from the beginning. It must provide information about Controls, test samples and other possible conditions. Generally to run analysis with DESeq2 you are free to create metadata table with arbitrary names and tags. However, to take advantage of functions provided in `RNAseqFun` package metadata table *MUST* include specific column names and tags.
 
 -   "strains": Types of strains of individual sample names.
 -   "condition": identifying Control and Test samples. Use only two tags here.
@@ -232,7 +232,7 @@ These are *MUST* columns, but you free to add more.
 
 Annotation table for *Synchytrium* supplied with the package. To upload it use following code.
 ``` r
-annotation_Tbl <- readRDS(system.file("extdata", "synchytrium_annotation.rda", package = "RNAseqFungi"))
+annotation_Tbl <- readRDS(system.file("extdata", "synchytrium_annotation.rda", package = "RNAseqFun"))
 ```
 
 ### Step 3: DESeq2 data object
@@ -255,7 +255,7 @@ keep <- rowSums(counts(dds)) >= 10
 dds <- dds[keep,]
 ```
 
-To make this step easier `RNAseqFungi` has function `DDSdataDESeq2`. It performs the same steps only in one line of code.
+To make this step easier `RNAseqFun` has function `DDSdataDESeq2`. It performs the same steps only in one line of code.
 
 ``` r
 dds <- DDSdataDESeq2(objectSE = se, metaDataTable = mtdata, designFormula = ~ condition)

@@ -1,31 +1,30 @@
-\name{getgenes}
-\alias{getgenes}
+\name{getGenes}
+\alias{getGenes}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Extract sequences from genome
+Extract genes from genome
 }
 \description{
-Function allow to extract genomic regions specified in GFF file from full lenght fasta genome.
+Using parseGFF function create a column in GFF data frame that corresponds to feature of interest (gene) names. Then read genome file into DNAStringSet (BioStrings package) object. The function will use sequnce coordinates in GFF to output specifed feature sequence DNAStringSet object.
 }
 \usage{
-getgenes(flname = NULL,
-          genomeDt = NA,
-          geneNamesData = NA,
-          gff = NA)
+getGenes(gff = NA,
+        genome = NA, outFile = "sequences.fasta",
+        ids_column = NA)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{flname}{
-Path and file name. If specified function will output file in FASTA format.
-}
-  \item{genomeDt}{
-DNAStringSet object with genome sequences to extract from.
-}
-  \item{geneNamesData}{
-Character vector corresponding to row names in GFF data.frame. If specified functions will ouput only specified sequences.
-}
   \item{gff}{
-Data frame. Preferabley output of parseGFF function. If using 'geneNamesData' option row names must contain IDs for specified annotation.
+Dara Frame with GFF file data, output of parseGFF function.
+}
+  \item{genome}{
+Genome to extract sequences from. DNAStringSet object from BioStrings.
+}
+  \item{outFile}{
+Name of the output FASTA file.
+}
+  \item{ids_column}{
+Column names in GFF data frame with gene IDs to extract from genome.
 }
 }
 \details{
@@ -42,7 +41,7 @@ Data frame. Preferabley output of parseGFF function. If using 'geneNamesData' op
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Anatoly Belov
 }
 \note{
 %%  ~~further notes~~
@@ -59,29 +58,16 @@ Data frame. Preferabley output of parseGFF function. If using 'geneNamesData' op
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (flname = NA, genomeDt, geneNamesData, gff)
+function (x)
 {
-    geneNamesData <- as.data.frame(geneNamesData[, 1])
-    names(geneNamesData)[1] <- "gene_id"
-    het_coor <- left_join(geneNamesData, gff[c("gene_id", "V1",
-        "V4", "V5")], by = "gene_id")
-    het_coor <- het_coor[!is.na(het_coor$V1), ]
-    het_coor$V1 <- as.character(het_coor$V1)
-    file.remove(flname)
-    message("File removed.")
-    for (i in het_coor$gene_id) {
-        promoters_seq <- DNAStringSet(genomeDt[[het_coor[het_coor$gene_id ==
-            i, "V1"]]], start = het_coor[het_coor$gene_id ==
-            i, "V4"], end = het_coor[het_coor$gene_id == i, "V5"])
-        names(promoters_seq) <- het_coor[het_coor$gene_id ==
-            i, "gene_id"]
-        writeXStringSet(promoters_seq, filepath = flname, format = "fasta",
-            append = T)
-    }
-    message("File saved.")
   }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+% R documentation directory (show via RShowDoc("KEYWORDS")):
+% \keyword{ ~kwd1 }
+% \keyword{ ~kwd2 }
+% Use only one keyword per line.
+% For non-standard keywords, use \concept instead of \keyword:
+% \concept{ ~cpt1 }
+% \concept{ ~cpt2 }
+% Use only one concept per line.

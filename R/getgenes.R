@@ -1,47 +1,46 @@
-getgenes <- function(flname = NULL,
-                     genomeDt = NA,
-                     geneNamesData = NA,
-                     gff = NA) {
+getgenes <- function(gff = NA,
+                     genome = NA, outFile = "sequences.fasta",
+                     ids_column = NA) {
+
+  gffDt <- data.frame(gff[c(ids_column, "sequence", "start", "end", "strand")])
+
+  extracted_seq <- Biostrings::DNAStringSet()
+
+  geneIDs <- gffDt[,ids_column]
+
+        for(i in 1:length(geneIDs)) {
+
+          # condition for positive strand
+          #gene_seq <- DNAStringSet(genomeDt[[gffDt[gffDt[,ids_column] == geneIDs[i], "sequence"]]], start = gffDt[gffDt[,ids_column] == geneIDs[i], "start"], end = gffDt[gffDt[,ids_column] == geneIDs[i], "end"])
+
+          # Chromosome name in 'sequence' column
+          chr =  as.character(gffDt[gffDt[,ids_column] == geneIDs[i], "sequence"])
+
+          # Gene's position
+          start_position = as.integer(gffDt[gffDt[,ids_column] == geneIDs[i], "start"])
+          end_position = as.integer(gffDt[gffDt[,ids_column] == geneIDs[i], "end"])
 
 
-  if(is.na(genomeDt)) {
-    stop("Genome data is missing!", call. = FALSE)
-  } else if(is.na(gff)) {
-    stop("GFF data is missing!", call. = FALSE)
+          # Extracted sequence
+          gene_seq <- Biostrings::DNAStringSet(Biostrings::subseq(genome[[chr]], start = start_position, end = end_position))
+          names(gene_seq) <- geneIDs[i]
+
+          # Strand sign
+          stran_check = as.character(gffDt[gffDt[,ids_column] == geneIDs[i], "strand"])
+
+          if(stran_check == "-") {
+            # If gene is on negative srtad
+            gene_seq <- reverseComplement(gene_seq)
+          }
+
+          # Append to final sequence set.
+          extracted_seq <- append(extracted_seq, gene_seq, after=length(extracted_seq))
+        }
+
+  if(!is.na(outFile)) {
+    #Write FASTA file with significant genes.
+    writeXStringSet(extracted_seq, filepath = outFile, format="fasta", append = F)
   }
 
-  if(!is.na(geneNamesData)) {
-    gff <- gff[geneNamesData, c("sequence", "start", "end")]
-  }
-
-
-
-  # Extract and write fasta file of specified genes.
-  # Don't forget to delete
-
-  seqNames <- row.names(gff)
-
-  seqs_out <- DNAStringSet()
-
-  for(i in 1:length(seqNames)) {
-
-    # Genes of interest
-    seqs <- DNAStringSet(genomeDt[[gff[seqNames[i], "sequence"]]], start = gff[seqNames[i], "start"], end = gff[seqNames[i], "end"])
-    names(seqs) <- seqNames[i]
-
-    seqs_out <- append(seqs_out, seqs, after = length(seqs_out))
-  }
-
-  # Write FASTA file.
-
-  if(!is.null(flname)) {
-      if(file.exists(flname)) {
-        file.remove(flname)
-        message("File removed.")
-      }
-    message("File saved.")
-    writeXStringSet(seqs_out, filepath = flname, format = "fasta", append = F)
-  }
-
-  return(seqs_out)
+  return(extracted_seq)
 }
